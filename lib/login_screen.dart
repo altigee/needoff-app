@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:needoff/config.dart' show cfg;
 
 import 'app_state.dart' as appState;
 
@@ -13,8 +14,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   var _state;
 
-  TextEditingController _loginCtrl = TextEditingController(text: 'nmarchuk@altigee.com');
-  TextEditingController _pwdCtrl = TextEditingController(text: 'zaq1xsw2cde3');
+  TextEditingController _loginCtrl = TextEditingController(text: 'nmarchuk');
+  TextEditingController _pwdCtrl = TextEditingController(text: 'nm1234');
 
   @override
   void didChangeDependencies() {
@@ -49,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('login', style: TextStyle(fontFamily: 'Orbitron')),
+        title: Text('login(${cfg.env})', style: TextStyle(fontFamily: 'Orbitron')),
       ),
       body: Container(
         child: Padding(

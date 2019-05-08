@@ -1,3 +1,5 @@
+import 'package:needoff/api/http.dart' as http;
+
 class Auth {
   final _auth = {};
 
@@ -8,7 +10,17 @@ class Auth {
   Future signIn(String email, String pwd) async {
     var user;
     try {
-      user = null;
+      var data = await http.post(
+        '/auth/login',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: {
+          'username': email,
+          'password': pwd,
+        },
+      );
+      print(data.body);
     } catch (e) {
       print('**** error ****');
       print(e.message);
@@ -20,7 +32,7 @@ class Auth {
   }
 
   Future getUserData(userId) async {
-    var userData; 
+    var userData;
 
     if (userData.data == null || userData.data == null) {
       print('!!! USER NOT FOUND');

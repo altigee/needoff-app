@@ -1,5 +1,4 @@
 import 'package:scoped_model/scoped_model.dart';
-
 import 'models/user_model.dart';
 import 'auth.dart';
 

@@ -20,8 +20,14 @@ class AppStateModel extends Model {
     notifyListeners();
   }
 
+  Future checkForUser() async {
+    var data = await auth.getProfile();
+    _profile = data == null ? null : UserProfile(data);
+    return _profile;
+  } 
+
   addSickLeave(Leave sl) async {
-    this._profile.addSickLeave(sl);
+    _profile.addSickLeave(sl);
     notifyListeners();
   }
 }

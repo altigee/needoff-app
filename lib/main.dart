@@ -54,6 +54,11 @@ class _RootState extends State<Root> {
   void didChangeDependencies(){
     super.didChangeDependencies();
     _state = ScopedModel.of<appState.AppStateModel>(context);
+    // _state.addListener((){
+    //   setState(() {
+        
+    //   });
+    // });
   }
   
   get _body {
@@ -69,10 +74,15 @@ class _RootState extends State<Root> {
   }
   @override
   Widget build(BuildContext context) {
-    return ScopedModelDescendant<appState.AppStateModel>(
-      builder: (ctx, child, state){
-        return _body;
-      },
+    return FutureBuilder(
+      future: _state.checkForUser(),
+      builder: (context, snapshot) {
+        return ScopedModelDescendant<appState.AppStateModel>(
+          builder: (ctx, child, state){
+            return _body;
+          },
+        );
+      }
     );
   }
 }

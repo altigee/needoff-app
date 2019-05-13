@@ -3,6 +3,7 @@ import 'package:scoped_model/scoped_model.dart';
 
 import 'package:needoff/app_state.dart' as appState;
 import 'package:needoff/models/user_model.dart';
+import 'package:needoff/api/storage.dart' as storage;
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -16,10 +17,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _state = ScopedModel.of<appState.AppStateModel>(context);
-    _state.addListener((){
-      print(_state.profile);
-      setState(() { });
-    });
   }
 
   @override
@@ -45,6 +42,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Text(profile?.phone ?? 'Unknown'),
             Text(profile?.position ?? 'Unknown'),
             Text(profile?.startDate.toString() ?? 'Unknown'),
+            RaisedButton(
+              onPressed: () {
+                storage.removeToken();
+                _state.profile = null;
+                Navigator.of(context).popUntil((Route route) => route.settings.name == '/');
+              },
+              child: Text('Logout'),
+            )
           ],
         ),
       ),

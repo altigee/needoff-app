@@ -15,12 +15,12 @@ class UserProfile {
         _email = profile['email'];
         _phone = profile['phone'];
         _position = profile['position'];
-        _startDate =  DateTime.fromMillisecondsSinceEpoch(profile['start_date'].millisecondsSinceEpoch);
+        _startDate = DateTime.parse(profile['start_date']);
       }
       if (leaves != null) {
         for (var k in leaves.keys) {
           _leaves[k] = List.from(leaves[k].map((leave){
-            return Leave(leave['start_date'], leave['end_date'], leave['comment']);
+            return Leave(DateTime.parse(leave['start_date']), DateTime.parse(leave['end_date']), leave['comment']);
           }));
         }
       }

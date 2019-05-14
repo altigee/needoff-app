@@ -14,7 +14,10 @@ class _LeavesScreenState extends State<LeavesScreen> {
         children: <Widget>[
           Text(
             'more',
-            style: Theme.of(context).textTheme.overline.apply(fontFamily: 'Orbitron'),
+            style: Theme.of(context)
+                .textTheme
+                .overline
+                .apply(fontFamily: 'Orbitron'),
           ),
           Icon(
             Icons.arrow_forward,
@@ -39,11 +42,33 @@ class _LeavesScreenState extends State<LeavesScreen> {
           ),
           Text(
             '9',
-            style: Theme.of(context).textTheme.display1.copyWith(color: Theme.of(context).accentColor),
+            style: Theme.of(context)
+                .textTheme
+                .display1
+                .copyWith(color: Theme.of(context).accentColor),
           ),
-          _btnMore(onPressed: () {
-            Navigator.of(context).pushNamed('/leaves/sick');
-          })
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              FlatButton(
+                child: Text(
+                  'Sick today',
+                  style: Theme.of(context)
+                      .textTheme
+                      .overline
+                      .apply(fontFamily: 'Orbitron'),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/leaves/sick', arguments: {
+                    'addSickToday': true,
+                  });
+                },
+              ),
+              _btnMore(onPressed: () {
+                Navigator.of(context).pushNamed('/leaves/sick');
+              }),
+            ],
+          )
         ],
       ),
     );
@@ -57,8 +82,10 @@ class _LeavesScreenState extends State<LeavesScreen> {
           ),
           Text(
             '12',
-            style: Theme.of(context).textTheme.display1.copyWith(color: Theme.of(context).accentColor),
-            
+            style: Theme.of(context)
+                .textTheme
+                .display1
+                .copyWith(color: Theme.of(context).accentColor),
           ),
           _btnMore(onPressed: () {
             Navigator.of(context).pushNamed('/leaves/vac');
@@ -74,7 +101,11 @@ class _LeavesScreenState extends State<LeavesScreen> {
             'WFH',
             style: Theme.of(context).textTheme.headline,
           ),
-          Icon(Icons.all_inclusive, color:  Theme.of(context).accentColor, size: 32,),
+          Icon(
+            Icons.all_inclusive,
+            color: Theme.of(context).accentColor,
+            size: 32,
+          ),
           _btnMore(onPressed: () {
             Navigator.of(context).pushNamed('/leaves/wfh');
           }),

@@ -14,8 +14,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   var _state;
 
-  TextEditingController _loginCtrl = TextEditingController(text: 'nmarchuk');
-  TextEditingController _pwdCtrl = TextEditingController(text: 'nm1234');
+  TextEditingController _loginCtrl = TextEditingController();
+  TextEditingController _pwdCtrl = TextEditingController();
 
   @override
   void didChangeDependencies() {

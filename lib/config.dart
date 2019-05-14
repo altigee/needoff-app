@@ -1,13 +1,15 @@
-import 'dart:convert';
-
 class _Config {
-  var _cfgObj;
+  var _data = {};
   _Config();
-  get env {
-    return _cfgObj['env'];
+  void setData(Map data) {
+    _data = data;
   }
-  void setJson(String cfgJson) {
-    _cfgObj = json.decode(cfgJson);
+  Map get data {
+    return _data;
+  }
+
+  get(String field) {
+    return _data[field];
   }
 }
-final _Config cfg = _Config();
+final _Config appConfig = _Config();

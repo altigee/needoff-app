@@ -1,9 +1,10 @@
-import 'package:needoff/env/dev.dart' as env;
-import 'package:needoff/config.dart' show cfg;
+import 'package:needoff/env/dev.dart' show config;
+import 'package:needoff/config.dart' show appConfig;
 import 'main.dart' as mainEntry;
 
 void main() {
-  cfg.setJson(env.json);
-  print(env.json);
+  appConfig.setData(config);
+  print(appConfig.data);
+  print(appConfig.get('env'));
   mainEntry.main();
 }

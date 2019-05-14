@@ -1,5 +1,4 @@
-const String json = '''
-{
-    "env": "development"
-}
-''';
+Map config ={
+  "env": "development",
+  "apiUrl": "http://localhost:3344/v1",
+};

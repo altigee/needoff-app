@@ -12,22 +12,18 @@ class AppStateModel extends Model {
   }
 
   set profile(userData) {
-    if (userData == null) {
-      _profile = null;
-    } else {
-      _profile = UserProfile(userData);
-    }
+    _profile = userData == null ? null : UserProfile(userData);
     notifyListeners();
   }
 
-  Future checkForUser() async {
+  Future fetchProfile() async {
     var data = await auth.getProfile();
     _profile = data == null ? null : UserProfile(data);
     return _profile;
-  } 
+  }
 
   addSickLeave(Leave sl) async {
-    _profile.addSickLeave(sl);
-    notifyListeners();
+    await _profile.addSickLeave(sl);
+    fetchProfile();
   }
 }

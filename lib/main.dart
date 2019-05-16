@@ -49,11 +49,13 @@ class Root extends StatefulWidget {
 }
 
 class _RootState extends State<Root> {
-  var _state;
+  var _state, _profileFuture;
+
   @override
   void didChangeDependencies(){
     super.didChangeDependencies();
     _state = ScopedModel.of<appState.AppStateModel>(context);
+    _profileFuture = _state.fetchProfile();
     // _state.addListener((){
     //   setState(() {
         
@@ -75,7 +77,7 @@ class _RootState extends State<Root> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _state.checkForUser(),
+      future: _profileFuture,
       builder: (context, snapshot) {
         return ScopedModelDescendant<appState.AppStateModel>(
           builder: (ctx, child, state){

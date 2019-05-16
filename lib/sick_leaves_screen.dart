@@ -15,8 +15,23 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
   AppStateModel _state;
   bool _addSickDialogOpened = false;
 
+  _listOrEmptyMsg() {
+    if (_state.profile.leaves['sick_days'] == null) {
+      return Center(
+        child: Text('No entries found.'),
+      );
+    }
+    return ListView(
+        children: ListTile.divideTiles(context: context, tiles: _buildList())
+            .toList(),
+      );
+  }
+
   List<Widget> _buildList() {
     List<Leave> data = _state.profile.leaves['sick_days'];
+    if (data == null) {
+      data = [];
+    }
     return data.map((item) {
       Duration diff = item.endDate.difference(item.startDate);
       String dates = '${formatDate(item.startDate)}';
@@ -34,7 +49,7 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
             Text(days),
           ],
         ),
-        subtitle: Text(item.comment),
+        subtitle: Text(item.comment ?? ''),
       );
     }).toList();
   }
@@ -231,12 +246,14 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
         title: Text('sick days', style: TextStyle(fontFamily: 'Orbitron')),
       ),
       body: Container(
-        child: ListView(
-          children: ListTile.divideTiles(context: context, tiles: _buildList())
-              .toList(),
-        ),
+        child: _listOrEmptyMsg(),
+        // child: ListView(
+        //   children: ListTile.divideTiles(context: context, tiles: _buildList())
+        //       .toList(),
+        // ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).accentColor,
         onPressed: () {
           _handleAddSick(context);
         },

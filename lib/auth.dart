@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:needoff/api/http.dart' as http;
 import 'package:needoff/api/storage.dart' as storage;
+import 'package:needoff/api/gql.dart' as gql;
 
 class Auth {
   final _auth = {};
@@ -39,21 +40,31 @@ class Auth {
       print('[GET PROFILE] : NO TOKEN');
       return null;
     }
-    return { 'profile': {
-      "email": "nmarchuk@altigee.com",
-      "name": "Nazar Marchuk",
-      "phone": "+380991110099",
-      "position": "UI developer",
-      "start_date":"2017-02-27",
-    }, 'leaves': {
-      'sick_days': [
-        {
-          'comment': 'Feel bad (',
-          'start_date': '2017-05-05',
-          'end_date': '2017-05-05',
-        }
-      ],
-    }};
-    // return http.get('/profile');
+    try{
+      var p = await gql.rawQuery('''
+query MyProfile{
+  profile{ 
+    firstName,
+    lastName,
+    email,
+    position,
+    phone
+  }
+  leaves: myLeaves{
+    startDate,
+    endDate,
+    leaveType,
+  }
+}
+''');
+      print(p);
+      if (p.data == null || p.hasErrors) {
+        throw Error();
+      }
+      return p.data;
+    } catch(e) {
+      print('FAIL GET PROFILE');
+      storage.removeToken();
+    }
   }
 }

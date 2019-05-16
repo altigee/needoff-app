@@ -1,44 +1,57 @@
+import 'package:needoff/services/leaves.dart' as leavesService;
+
 class UserProfile {
-  String _name;
+  String _firstName;
+  String _lastName;
   String _email;
   String _phone;
   String _position;
   DateTime _startDate;
-  Map<String, List<Leave>> _leaves = {};
+  Map<String, List<Leave>> _leaves = {'sick_days': []};
 
   UserProfile(userData) {
     if (userData != null) {
       final profile = userData['profile'];
-      Map leaves = userData['leaves'];
+      List leaves = userData['leaves'];
       if (profile != null) {
-        _name = profile['name'];
+        _firstName = profile['firstName'];
+        _lastName = profile['lastName'];
         _email = profile['email'];
         _phone = profile['phone'];
         _position = profile['position'];
-        _startDate = DateTime.parse(profile['start_date']);
+        _startDate = profile['start_date'] != null
+            ? DateTime.parse(profile['start_date'])
+            : null;
       }
       if (leaves != null) {
-        for (var k in leaves.keys) {
-          _leaves[k] = List.from(leaves[k].map((leave){
-            return Leave(DateTime.parse(leave['start_date']), DateTime.parse(leave['end_date']), leave['comment']);
-          }));
+        for (var item in leaves) {
+          switch (item['leaveType']) {
+            case 'LEAVE_SICK_LEAVE':
+              _leaves['sick_days'].add(Leave(
+                  DateTime.parse(item['startDate']),
+                  DateTime.parse(item['endDate']),
+                  item['comment']));
+          }
         }
       }
     }
-    print(_name);
+    print(_firstName);
     print(_email);
   }
 
-  get name => _name;
+  get name => '${_firstName} ${_lastName}';
   get email => _email;
   get phone => _phone;
   get position => _position;
   get leaves => _leaves;
   get startDate => _startDate;
 
-  addSickLeave(Leave sl) {
-    if (sl != null) {
-      this._leaves['sick_days'].add(sl);
+  addSickLeave(Leave leave) async {
+    if (leave != null) {
+      var res =
+          await leavesService.addSickLeave(leave.startDate, leave.endDate);
+      print('!!!!!!!!!!');
+      print(res);
     }
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
+// import 'package:scoped_model/scoped_model.dart';
 
-import 'package:needoff/app_state.dart' as appState;
+// import 'package:needoff/app_state.dart' as appState;
 
 class StartScreen extends StatefulWidget {
   @override
@@ -9,13 +9,13 @@ class StartScreen extends StatefulWidget {
 }
 
 class _StartScreenState extends State<StartScreen> {
-  appState.AppStateModel _state;
+  // appState.AppStateModel _state;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _state = ScopedModel.of<appState.AppStateModel>(context);
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   _state = ScopedModel.of<appState.AppStateModel>(context);
+  // }
 
   @override
   Widget build(BuildContext context) {

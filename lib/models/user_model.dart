@@ -39,7 +39,7 @@ class UserProfile {
     print(_email);
   }
 
-  get name => '${_firstName} ${_lastName}';
+  get name => '$_firstName $_lastName';
   get email => _email;
   get phone => _phone;
   get position => _position;

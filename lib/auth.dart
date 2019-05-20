@@ -18,7 +18,7 @@ class Auth {
           'Content-Type': 'application/json',
         },
         body: {
-          'username': email,
+          'email': email,
           'password': pwd,
         },
       );

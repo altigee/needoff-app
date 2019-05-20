@@ -1,5 +1,4 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:graphql_flutter/src/core/raw_operation_data.dart';
 import 'package:needoff/config.dart' show appConfig;
 import 'package:needoff/api/storage.dart' as storage;
 

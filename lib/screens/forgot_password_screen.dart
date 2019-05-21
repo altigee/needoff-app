@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:needoff/parts/app_scaffold.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   @override
@@ -10,10 +11,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('reset password', style: TextStyle(fontFamily: 'Orbitron')),
-      ),
+    return AppScaffold(
+      'reset password',
       body: Container(
         child: Center(child: Text('Ooops :(')),
       ),

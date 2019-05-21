@@ -5,6 +5,7 @@ import 'package:scoped_model/scoped_model.dart';
 
 import 'package:needoff/app_state.dart';
 import 'package:needoff/utils/dates.dart';
+import 'package:needoff/parts/app_scaffold.dart';
 
 class SickLeavesScreen extends StatefulWidget {
   @override
@@ -22,9 +23,9 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
       );
     }
     return ListView(
-        children: ListTile.divideTiles(context: context, tiles: _buildList())
-            .toList(),
-      );
+      children:
+          ListTile.divideTiles(context: context, tiles: _buildList()).toList(),
+    );
   }
 
   List<Widget> _buildList() {
@@ -75,14 +76,12 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
                 onPressed: () {
                   print('ok');
                   if (_formKey.currentState.validate()) {
-                  // if (Form.of(context).validate()) {
+                    // if (Form.of(context).validate()) {
                     var df = DateFormat.yMMMd();
                     Navigator.pop(
                         context,
-                        Leave(
-                            df.parse(_startInpCtrl.text),
-                            df.parse(_endInpCtrl.text),
-                            _commentInpCtrl.text));
+                        Leave(df.parse(_startInpCtrl.text),
+                            df.parse(_endInpCtrl.text), _commentInpCtrl.text));
                   }
                 },
               ),
@@ -94,8 +93,7 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
 
         return SimpleDialog(
           title: Container(
-            decoration:
-                BoxDecoration(color: Theme.of(context).primaryColor),
+            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Text(
@@ -185,7 +183,7 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
         initialDate: DateTime.now());
   }
 
-  _handleAddSick (context) async {
+  _handleAddSick(context) async {
     if (_addSickDialogOpened == true) {
       return null;
     }
@@ -208,10 +206,11 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
   void _updateListener() {
     setState(() {});
   }
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timestamp){
+    WidgetsBinding.instance.addPostFrameCallback((timestamp) {
       Map args = ModalRoute.of(context).settings.arguments;
       var ctx = context;
       Future.delayed(Duration(milliseconds: 100), () {
@@ -220,11 +219,11 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
           if (args != null && Map.from(args)['addSickToday'] == true) {
             _handleAddSick(ctx);
           }
-        } catch (e) {
-        }
+        } catch (e) {}
       });
     });
   }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -241,10 +240,8 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('sick days', style: TextStyle(fontFamily: 'Orbitron')),
-      ),
+    return AppScaffold(
+      'sick days',
       body: Container(
         child: _listOrEmptyMsg(),
         // child: ListView(

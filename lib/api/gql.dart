@@ -33,6 +33,7 @@ rawMutation(String mutation) async {
     if (res.hasErrors) {
       print('GQL > Mutation res > has errorr');
     }
+    return res;
   } catch (e) {
     print(e);
   }

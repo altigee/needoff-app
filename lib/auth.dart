@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:graphql_flutter/graphql_flutter.dart';
+
 import 'package:needoff/api/http.dart' as http;
 import 'package:needoff/api/storage.dart' as storage;
 import 'package:needoff/api/gql.dart' as gql;
@@ -8,6 +10,32 @@ class Auth {
 
   get auth {
     return _auth;
+  }
+
+  Future signUp(String email, String pwd) async {
+    try {
+      QueryResult res = await gql.rawMutation('''
+      mutation CreateAccount {
+        register(email: "$email", password: "$pwd") {
+          ok,
+          response {
+            id,
+            email
+          }
+        }
+      }
+      ''');
+      print(res);
+      if (!res.hasErrors) {
+        return signIn(email, pwd);
+      } else {
+        return null;
+      }
+
+    } catch (e) {
+      print('![ERROR] Registration failed');
+      rethrow;
+    }
   }
 
   Future signIn(String email, String pwd) async {
@@ -31,7 +59,7 @@ class Auth {
       }
     } catch (e) {
       print('**** error ****');
-      print(e.message);
+      print(e);
     }
   }
 
@@ -50,10 +78,15 @@ query MyProfile{
     position,
     phone
   }
-  leaves: myLeaves{
+  leaves: myLeaves(workspaceId: 1){
     startDate,
     endDate,
     leaveType,
+  }
+  workspaces: myWorkspaces {
+    id,
+    name,
+    description,
   }
 }
 ''');

@@ -23,8 +23,9 @@ class _StartScreenState extends State<StartScreen> {
       appBar: AppBar(
         title: Text('command center', style: TextStyle(fontFamily: 'Orbitron')),
       ),
-      body: Container(
+      body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             RaisedButton(
               onPressed: () {
@@ -37,6 +38,12 @@ class _StartScreenState extends State<StartScreen> {
                 Navigator.of(context).pushNamed('/leaves');
               },
               child: Text('Leaves'),
+            ),
+            RaisedButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('/workspaces');
+              },
+              child: Text('Workspaces'),
             ),
           ],
         ),

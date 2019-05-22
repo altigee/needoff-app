@@ -13,6 +13,7 @@ import 'package:needoff/screens/forgot_password_screen.dart';
 import 'package:needoff/screens/profile_screen.dart';
 import 'package:needoff/screens/profile_edit_screen.dart';
 import 'package:needoff/screens/workspaces_screen.dart';
+import 'package:needoff/screens/workspace_edit_screen.dart';
 
 final Model appStateModel = appState.AppStateModel();
 void main() => runApp(MyApp());
@@ -40,7 +41,8 @@ class MyApp extends StatelessWidget {
           '/leaves/wfh': (BuildContext context) => WfhLeavesScreen(),
           '/registration': (BuildContext context) => RegistrationScreen(),
           '/forgot-pwd': (BuildContext context) => ForgotPasswordScreen(),
-          '/workspaces': (BuildContext context) => WorkSpacesScreen(),
+          '/workspaces': (BuildContext context) => WorkspacesScreen(),
+          '/workspace-edit': (BuildContext context) => WorkspaceEditScreen(),
         },
         initialRoute: '/',
       ),

@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _tokenKey = 'jwt_access';
+const _wsKey = 'workspace_id';
 Future get _ref {
   return SharedPreferences.getInstance();
 }
@@ -14,4 +15,12 @@ Future setToken(token) async {
 
 Future removeToken() async {
   return (await _ref).remove(_tokenKey);
+}
+
+Future getWorkspace() async {
+  return (await _ref).getInt(_wsKey);
+}
+
+Future setWorkspace(int wsId) async {
+  return (await _ref).setInt(_wsKey, wsId);
 }

@@ -4,12 +4,12 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:needoff/app_state.dart';
 import 'package:needoff/parts/app_scaffold.dart';
 
-class WorkSpacesScreen extends StatefulWidget {
+class WorkspacesScreen extends StatefulWidget {
   @override
-  _WorkSpacesScreenState createState() => _WorkSpacesScreenState();
+  _WorkspacesScreenState createState() => _WorkspacesScreenState();
 }
 
-class _WorkSpacesScreenState extends State<WorkSpacesScreen> {
+class _WorkspacesScreenState extends State<WorkspacesScreen> {
   AppStateModel _state;
   _listOrEmptyMsg() {
     if (_state.profile.workspaces == null || _state.profile.workspaces.length == 0) {
@@ -34,6 +34,7 @@ class _WorkSpacesScreenState extends State<WorkSpacesScreen> {
         contentPadding: EdgeInsets.fromLTRB(16, 4, 16, 4),
         title: Text(item.name),
         subtitle: Text(item.description ?? ''),
+        trailing: Icon(Icons.radio_button_unchecked),
       );
     }).toList();
   }
@@ -57,6 +58,7 @@ class _WorkSpacesScreenState extends State<WorkSpacesScreen> {
         onPressed: () {
           // _handleAddSick(context);
           print('add workspace');
+          Navigator.of(context).pushNamed('/workspace-edit');
         },
         child: Icon(Icons.add),
       ),

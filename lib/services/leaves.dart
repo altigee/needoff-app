@@ -17,10 +17,10 @@ addSickLeave(DateTime startDate, DateTime endDate) async {
   return res;
 }
 
-fetchLeaves() async {
+fetchLeaves(int workspaceId) async {
   var res = await gql.rawQuery('''
     query FetchLeaves {
-      myLeaves {
+      leaves: myLeaves(workspaceId: $workspaceId) {
         id,
         leaveType,
         startDate,

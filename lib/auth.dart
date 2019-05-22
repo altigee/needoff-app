@@ -78,11 +78,6 @@ query MyProfile{
     position,
     phone
   }
-  leaves: myLeaves(workspaceId: 1){
-    startDate,
-    endDate,
-    leaveType,
-  }
   workspaces: myWorkspaces {
     id,
     name,

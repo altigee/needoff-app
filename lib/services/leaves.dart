@@ -4,7 +4,7 @@ addSickLeave(DateTime startDate, DateTime endDate) async {
   String type = 'LEAVE_SICK_LEAVE';
   var res = await gql.rawMutation('''
     mutation CreateLeave {
-      createDayOff(leaveType: "$type", startDate: "${startDate}", endDate: "${endDate}") {
+      createDayOff(leaveType: "$type", startDate: "$startDate", endDate: "$endDate", workspaceId: 1) {
         dayOff {
           id,
           userId,
@@ -14,6 +14,7 @@ addSickLeave(DateTime startDate, DateTime endDate) async {
       }
     }
   ''');
+  return res;
 }
 
 fetchLeaves() async {
@@ -28,4 +29,5 @@ fetchLeaves() async {
       }
     }
   ''');
+  return res;
 }

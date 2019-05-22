@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:needoff/parts/app_scaffold.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   @override
@@ -8,10 +9,8 @@ class ProfileEditScreen extends StatefulWidget {
 class _ProfileEditScreenState extends State<ProfileEditScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('edit profile', style: TextStyle(fontFamily: 'Orbitron')),
-      ),
+    return AppScaffold(
+      'edit profile',
       body: Container(
         child: Text('Edit'),
       ),

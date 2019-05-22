@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:needoff/parts/app_scaffold.dart';
 
 class LeavesScreen extends StatefulWidget {
   @override
@@ -112,10 +113,8 @@ class _LeavesScreenState extends State<LeavesScreen> {
         ],
       ),
     );
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('leaves', style: TextStyle(fontFamily: 'Orbitron')),
-      ),
+    return AppScaffold(
+      'leaves',
       body: Container(
         child: Center(
           child: Column(

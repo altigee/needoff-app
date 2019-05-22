@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:needoff/parts/app_scaffold.dart';
 
 class VacLeavesScreen extends StatefulWidget {
   @override
@@ -8,10 +9,8 @@ class VacLeavesScreen extends StatefulWidget {
 class _VacLeavesScreenState extends State<VacLeavesScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('vacations', style: TextStyle(fontFamily: 'Orbitron')),
-      ),
+    return AppScaffold(
+      'vacations',
       body: Container(
         child: Text('Vac leaves screen'),
       ),

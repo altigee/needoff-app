@@ -36,6 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             RaisedButton(
               onPressed: () {
                 storage.removeToken();
+                storage.removeWorkspace();
                 _state.profile = null;
                 Navigator.of(context).popUntil((Route route) => route.settings.name == '/');
               },

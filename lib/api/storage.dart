@@ -22,5 +22,9 @@ Future getWorkspace() async {
 }
 
 Future setWorkspace(int wsId) async {
-  return (await _ref).setInt(_wsKey, wsId);
+  return await (await _ref).setInt(_wsKey, wsId);
+}
+
+Future removeWorkspace() async {
+  return (await _ref).remove(_wsKey);
 }

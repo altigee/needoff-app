@@ -59,7 +59,7 @@ class UserProfile {
   addSickLeave(Leave leave) async {
     if (leave != null) {
       var res =
-          await leavesService.addSickLeave(leave.startDate, leave.endDate);
+          await leavesService.addSickLeave(leave.startDate, leave.endDate, leave.comment);
       print('!!!!!!!!!!');
       print(res);
     }

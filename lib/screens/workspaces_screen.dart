@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
 
-import 'package:needoff/app_state.dart';
+import 'package:needoff/app_state.dart' show appState, AppStateException;
 import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/api/storage.dart' as storage;
+import 'package:needoff/utils/ui.dart';
 
 class WorkspacesScreen extends StatefulWidget {
   @override
@@ -11,10 +11,17 @@ class WorkspacesScreen extends StatefulWidget {
 }
 
 class _WorkspacesScreenState extends State<WorkspacesScreen> {
-  AppStateModel _state;
   int _activeWSId;
+  bool _loading = false;
+  bool get loading => _loading;
+  set loading(bool value) {
+    setState(() {
+      _loading = value;
+    });
+  }
+
   _listOrEmptyMsg() {
-    if (_state.profile.workspaces == null || _state.profile.workspaces.length == 0) {
+    if (appState.workspaces.length == 0) {
       return Center(
         child: Text('No entries found.'),
       );
@@ -28,28 +35,24 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
   _setCurrentWorkspace(ws) async {
     if (ws.id != null) {
       try {
-        int id = int.parse(ws.id);
-        if( await storage.setWorkspace(id) ) {
+        int id = ws.id;
+        if (await storage.setWorkspace(id)) {
           setState(() {
             _activeWSId = id;
           });
         }
-      } catch(e) {
+      } catch (e) {
         print('![ERROR] Can not set active workspace');
       }
     }
   }
 
   List<Widget> _buildList() {
-    List data = _state.profile.workspaces;
-    if (data == null) {
-      data = [];
-    }
-    return data.map((item) {
+    return appState.workspaces.map((item) {
       bool current = false;
       try {
-        current = _activeWSId == int.parse(item.id) ? true : false;
-      } catch(e) {}
+        current = _activeWSId == item.id ? true : false;
+      } catch (e) {}
       return ListTile(
         onTap: () {
           _setCurrentWorkspace(item);
@@ -57,25 +60,44 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
         contentPadding: EdgeInsets.fromLTRB(16, 4, 16, 4),
         title: Text(item.name),
         subtitle: Text(item.description ?? ''),
-        trailing: Icon(current ? Icons.radio_button_checked : Icons.radio_button_unchecked),
+        trailing: Icon(current
+            ? Icons.radio_button_checked
+            : Icons.radio_button_unchecked),
       );
     }).toList();
+  }
+
+  void _updateStateListener() {
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    storage.getWorkspace()
-    .then((id) => setState((){
-      _activeWSId = id;
-    }));
+    storage.getWorkspace().then((id) => setState(() {
+          _activeWSId = id;
+        }));
+    appState.changes.addListener(_updateStateListener);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print('SICK LEAVES SCREEN :: didChangeDependencies()');
-    _state = ScopedModel.of<AppStateModel>(context);
+    loading = true;
+    try {
+      appState.fetchWorkspaces();
+    } on AppStateException catch (e) {
+      snack(context, e.message);
+    } catch (e) {
+      snack(context, 'Something went wrong');
+    }
+    loading = false;
+  }
+
+  @override
+  void dispose() {
+    appState.changes.removeListener(_updateStateListener);
+    super.dispose();
   }
 
   @override
@@ -83,7 +105,11 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
     return AppScaffold(
       'workspaces',
       body: Center(
-        child: _listOrEmptyMsg(),
+        child: loading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : _listOrEmptyMsg(),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).accentColor,

@@ -13,6 +13,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       'reset password',
+      banner: false,
       body: Container(
         child: Center(child: Text('Ooops :(')),
       ),

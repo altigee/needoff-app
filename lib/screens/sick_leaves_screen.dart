@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:needoff/models/user_model.dart';
-import 'package:scoped_model/scoped_model.dart';
 
-import 'package:needoff/app_state.dart';
+import 'package:needoff/app_state.dart' show appState, AppStateException;
+import 'package:needoff/models/leave.dart';
 import 'package:needoff/utils/dates.dart';
 import 'package:needoff/parts/app_scaffold.dart';
+import 'package:needoff/utils/ui.dart';
 
 class SickLeavesScreen extends StatefulWidget {
   @override
@@ -13,11 +13,12 @@ class SickLeavesScreen extends StatefulWidget {
 }
 
 class _SickLeavesScreenState extends State<SickLeavesScreen> {
-  AppStateModel _state;
   bool _addSickDialogOpened = false;
+  final String sickLeaveType = 'LEAVE_SICK_LEAVE';
+  GlobalKey _scaffoldKey = GlobalKey<ScaffoldState>();
 
   _listOrEmptyMsg() {
-    if (_state.profile.leaves['sick_days'] == null) {
+    if (appState.leaves.length == 0) {
       return Center(
         child: Text('No entries found.'),
       );
@@ -29,7 +30,7 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
   }
 
   List<Widget> _buildList() {
-    List<Leave> data = _state.profile.leaves['sick_days'];
+    List<Leave> data = appState.leaves;
     if (data == null) {
       data = [];
     }
@@ -80,7 +81,7 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
                     var df = DateFormat.yMMMd();
                     Navigator.pop(
                         context,
-                        Leave(df.parse(_startInpCtrl.text),
+                        Leave(sickLeaveType, df.parse(_startInpCtrl.text),
                             df.parse(_endInpCtrl.text), _commentInpCtrl.text));
                   }
                 },
@@ -187,12 +188,19 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
     if (_addSickDialogOpened == true) {
       return null;
     }
-    print('[ACTION] :: add sick leave');
     Leave newLeave = await _showAddSickDialog(context);
-    print('[NEW LEAVE] ::');
-    print([newLeave?.startDate, newLeave?.endDate, newLeave?.comment]);
     if (newLeave != null) {
-      _state.addSickLeave(newLeave);
+      try {
+        await appState.addLeave(newLeave);
+      } on AppStateException catch (e) {
+        WidgetsBinding.instance.addPostFrameCallback((timestamp) {
+          snack(_scaffoldKey.currentState, e.message);
+        });
+      } catch (e) {
+        WidgetsBinding.instance.addPostFrameCallback((timestamp) {
+          snack(_scaffoldKey.currentState, 'Something went wrong :(');
+        });
+      }
     }
   }
 
@@ -201,7 +209,7 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
       TextEditingController(text: formatDate(DateTime.now()));
   TextEditingController _endInpCtrl =
       TextEditingController(text: formatDate(DateTime.now()));
-  TextEditingController _commentInpCtrl = TextEditingController();
+  TextEditingController _commentInpCtrl = TextEditingController(text: 'test');
 
   void _updateListener() {
     setState(() {});
@@ -222,32 +230,24 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
         } catch (e) {}
       });
     });
-  }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    print('SICK LEAVES SCREEN :: didChangeDependencies()');
-    _state = ScopedModel.of<AppStateModel>(context);
-    _state.addListener(_updateListener);
+    appState.changes.addListener(_updateListener);
+    appState.fetchLeaves();
   }
 
   @override
   void dispose() {
+    appState.changes.removeListener(_updateListener);
     super.dispose();
-    _state.removeListener(_updateListener);
   }
 
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       'sick days',
+      key: _scaffoldKey,
       body: Container(
         child: _listOrEmptyMsg(),
-        // child: ListView(
-        //   children: ListTile.divideTiles(context: context, tiles: _buildList())
-        //       .toList(),
-        // ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).accentColor,

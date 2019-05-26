@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
 
-import 'package:needoff/app_state.dart' as appState;
+import 'package:needoff/app_state.dart' show appState, AppStateException;
+import 'package:needoff/models/credentials.dart';
 import 'package:needoff/parts/app_scaffold.dart';
+import 'package:needoff/utils/ui.dart';
 
 class RegistrationScreen extends StatefulWidget {
   @override
@@ -12,17 +13,10 @@ class RegistrationScreen extends StatefulWidget {
 class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  var _state;
 
   TextEditingController _emailCtrl = TextEditingController();
   TextEditingController _pwdCtrl = TextEditingController();
   TextEditingController _pwd2Ctrl = TextEditingController();
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _state = ScopedModel.of<appState.AppStateModel>(context);
-  }
 
   void _loading(bool val) {
     setState(() {
@@ -30,26 +24,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     });
   }
 
-  void _snack(String text) {
-    Scaffold.of(_formKey.currentContext)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(text)));
-  }
-
   Future _handleCreateAccount() async {
     if (_formKey.currentState.validate()) {
+      _loading(true);
       try {
-        _loading(true);
-        _state.profile =
-            await appState.auth.signUp(_emailCtrl.text, _pwdCtrl.text);
-        if (_state.profile == null) {
-          _snack('Failed to load user :(');
-        } else {
-          Navigator.of(context)
-              .popUntil((Route route) => route.settings.name == '/');
-        }
+        await appState.signup(Credentials(_emailCtrl.text, _pwdCtrl.text));
+      } on AppStateException catch(e) {
+        snack(_formKey.currentContext, e.message);
       } catch (e) {
-        _snack('Registration failed :(');
+        snack(_formKey.currentContext, 'Something went wrong :(');
       }
       _loading(false);
     }
@@ -59,6 +42,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       'registration',
+      banner: false,
       body: Center(
         child: SingleChildScrollView(
           child: Padding(

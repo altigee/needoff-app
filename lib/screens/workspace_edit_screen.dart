@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
+import 'package:needoff/models/workspace.dart';
 
 import 'package:needoff/parts/app_scaffold.dart';
-import 'package:needoff/services/workspace.dart' as wsService;
-import 'package:needoff/app_state.dart' as appState;
+import 'package:needoff/app_state.dart' show appState, AppStateException;
+import 'package:needoff/utils/ui.dart';
 
 class WorkspaceEditScreen extends StatefulWidget {
   @override
@@ -13,7 +13,6 @@ class WorkspaceEditScreen extends StatefulWidget {
 class _WorkspaceEditScreenState extends State<WorkspaceEditScreen> {
   var id;
   List members = [];
-  appState.AppStateModel _state;
   bool _isLoading = false;
   bool _autovalidate = false;
   final _formKey = GlobalKey<FormState>();
@@ -72,22 +71,19 @@ class _WorkspaceEditScreenState extends State<WorkspaceEditScreen> {
     if (_formKey.currentState.validate()) {
       _loading(true);
       try {
-        await wsService.createWorkspace(_nameInpCtrl.text, _descInpCtrl.text, members);
-        if (_state != null) {
-          await _state.fetchProfile();
-        }
+        await appState.addWorkspace(Workspace(
+          _nameInpCtrl.text,
+          description: _descInpCtrl.text,
+          members: members
+        ));
         Navigator.of(context).pop();
+      } on AppStateException catch(e) {
+        snack(_formKey.currentContext, e.message);
       } catch (e) {
-        print('![ERROR] Fail create ws');
+        snack(_formKey.currentContext, 'Something went wrong :(');
       }
       _loading(false);
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _state = ScopedModel.of<appState.AppStateModel>(context);
   }
 
   @override

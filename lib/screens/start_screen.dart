@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:needoff/parts/app_scaffold.dart';
 // import 'package:scoped_model/scoped_model.dart';
 
 // import 'package:needoff/app_state.dart' as appState;
@@ -19,10 +20,8 @@ class _StartScreenState extends State<StartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('command center', style: TextStyle(fontFamily: 'Orbitron')),
-      ),
+    return AppScaffold(
+      'command center',
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -1,11 +1,12 @@
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:needoff/api/gql.dart' as gql;
+import 'package:needoff/models/workspace.dart';
 
-createWorkspace(String name, String desciption, List members) {
-  String membersStr = '[${members.map((m) => '"$m"').toList().join(',')}]';
-  print(membersStr);
-  var res = gql.rawMutation('''
+create(Workspace ws) async {
+  String membersStr = '[${ws.members.map((m) => '"$m"').toList().join(',')}]';
+  QueryResult res = await gql.rawMutation('''
 mutation CreateWS {
-  createWorkspace(name: "$name", description: "$desciption", members: $membersStr) {
+  createWorkspace(name: "${ws.name}", description: "${ws.description}", members: $membersStr) {
     ok,
     ws {
       id,
@@ -16,5 +17,18 @@ mutation CreateWS {
 }
   ''');
 
+  return res;
+}
+
+fetch() async {
+  QueryResult res = await gql.rawQuery('''
+query MyWorkspaces {
+  workspaces: myWorkspaces {
+    id,
+    name,
+    description,
+  }
+}
+  ''');
   return res;
 }

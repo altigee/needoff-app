@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:needoff/app_state.dart' show appState;
 import 'package:needoff/screens/leaves_screen.dart';
+import 'package:needoff/screens/person_leaves.dart';
 import 'package:needoff/screens/sick_leaves_screen.dart';
+import 'package:needoff/screens/team_calendar.dart';
 import 'package:needoff/screens/vac_leaves_screen.dart';
 import 'package:needoff/screens/wfh_leaves_screen.dart';
 import 'package:needoff/screens/start_screen.dart';
@@ -39,6 +41,8 @@ class MyApp extends StatelessWidget {
         '/forgot-pwd': (BuildContext context) => ForgotPasswordScreen(),
         '/workspaces': (BuildContext context) => WorkspacesScreen(),
         '/workspace-edit': (BuildContext context) => WorkspaceEditScreen(),
+        '/team_calendar': (BuildContext context) => TeamCalendar(),
+        '/person_leaves': (BuildContext context) => PersonLeaves(),
       },
       initialRoute: '/',
     );

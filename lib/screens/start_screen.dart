@@ -44,6 +44,12 @@ class _StartScreenState extends State<StartScreen> {
               },
               child: Text('Workspaces'),
             ),
+            RaisedButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('/team_calendar');
+              },
+              child: Text('Team calendar'),
+            ),
           ],
         ),
       ),

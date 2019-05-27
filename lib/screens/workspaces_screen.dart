@@ -67,25 +67,25 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
     }).toList();
   }
 
-  void _updateStateListener() {
+  void _updateStateListener() async {
+    _activeWSId = await storage.getWorkspace();
     setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    storage.getWorkspace().then((id) => setState(() {
-          _activeWSId = id;
-        }));
+    storage.changes.addListener(_updateStateListener);
     appState.changes.addListener(_updateStateListener);
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
     loading = true;
     try {
-      appState.fetchWorkspaces();
+      await appState.fetchWorkspaces();
+      _activeWSId = await storage.getWorkspace();
     } on AppStateException catch (e) {
       snack(context, e.message);
     } catch (e) {
@@ -96,6 +96,7 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
 
   @override
   void dispose() {
+    storage.changes.removeListener(_updateStateListener);
     appState.changes.removeListener(_updateStateListener);
     super.dispose();
   }
@@ -114,8 +115,6 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).accentColor,
         onPressed: () {
-          // _handleAddSick(context);
-          print('add workspace');
           Navigator.of(context).pushNamed('/workspace-edit');
         },
         child: Icon(Icons.add),

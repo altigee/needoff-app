@@ -32,6 +32,7 @@ query FetchLeaves {
     leaveType,
     startDate,
     endDate,
+    comment,
   }
 }
   ''');

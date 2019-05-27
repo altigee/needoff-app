@@ -16,7 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   TextEditingController _emailCtrl =
-      TextEditingController(text: 'nmarchuk@altigee.com');
+      TextEditingController(text: '@alt.com');
   TextEditingController _pwdCtrl = TextEditingController(text: 'ssssss');
 
   void _loading(bool val) {

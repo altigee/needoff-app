@@ -62,7 +62,7 @@ class AppState {
       throw AppStateException('Failed to login.');
     }
 
-    return fetchProfile();
+    return fetchProfile().then((res) => fetchWorkspaces());
   }
 
   Future signup(Credentials creds) async {
@@ -75,7 +75,7 @@ class AppState {
       throw AppStateException('Failed to create account.');
     }
 
-    return fetchProfile();
+    return fetchProfile().then((res) => fetchWorkspaces());
   }
 
   Future logout() async {
@@ -136,11 +136,11 @@ class AppState {
             description: item['description'],
           ));
         }
-        workspaces = tmpWorkspaces;
         int wsId = await storage.getWorkspace();
-        if (wsId == null && workspaces.length == 1) {
-          storage.setWorkspace(workspaces[0].id);
+        if (wsId == null && tmpWorkspaces.length == 1) {
+          storage.setWorkspace(tmpWorkspaces[0].id);
         } 
+        workspaces = tmpWorkspaces;
       }
     } else {
       workspaces = [];

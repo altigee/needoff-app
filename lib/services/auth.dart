@@ -8,10 +8,8 @@ Future<QueryResult> signUp(Credentials creds) async {
 mutation CreateAccount {
   register(email: "${creds.email}", password: "${creds.password}") {
     ok,
-    response {
-      id,
-      email
-    }
+    userId,
+    accessToken,
   }
 }
   ''');

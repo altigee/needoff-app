@@ -29,6 +29,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       _loading(true);
       try {
         await appState.signup(Credentials(_emailCtrl.text, _pwdCtrl.text));
+        Navigator.of(context).pop();
       } on AppStateException catch(e) {
         snack(_formKey.currentContext, e.message);
       } catch (e) {

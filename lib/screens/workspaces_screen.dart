@@ -20,6 +20,8 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
     });
   }
 
+  final _scaffKey = GlobalKey<ScaffoldState>();
+
   _listOrEmptyMsg() {
     if (appState.workspaces.length == 0) {
       return Center(
@@ -87,9 +89,9 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
       await appState.fetchWorkspaces();
       _activeWSId = await storage.getWorkspace();
     } on AppStateException catch (e) {
-      snack(context, e.message);
+      snack(_scaffKey.currentState, e.message);
     } catch (e) {
-      snack(context, 'Something went wrong');
+      snack(_scaffKey.currentState, 'Something went wrong');
     }
     loading = false;
   }
@@ -105,6 +107,7 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       'workspaces',
+      key: _scaffKey,
       body: Center(
         child: loading
             ? Center(

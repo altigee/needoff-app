@@ -38,3 +38,23 @@ query FetchLeaves {
   ''');
   return res;
 }
+
+fetchTeamLeaves(int workspaceId) async {
+  QueryResult res = await gql.rawQuery('''
+query TeamCalendar {
+  leaves: teamCalendar(workspaceId: $workspaceId) {
+    leaveType,
+    userId,
+    startDate,
+    endDate,
+    user {
+      firstName,
+      lastName,
+      email,
+    }
+  }
+}
+  ''');
+
+  return res;
+}

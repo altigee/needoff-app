@@ -117,11 +117,22 @@ class AppState {
   }
 
   Future addLeave(Leave leave) async {
-    QueryResult res = await leavesServ.create(await storage.getWorkspace(), leave);
+    QueryResult res =
+        await leavesServ.create(await storage.getWorkspace(), leave);
     if (res.hasErrors) {
       throw AppStateException('Failed to add new leave.');
     }
     return fetchLeaves();
+  }
+  
+  Future fetchTeamLeaves() async {
+    int workspaceId = await storage.getWorkspace();
+    QueryResult res = await leavesServ.fetchTeamLeaves(workspaceId);
+    if (!res.hasErrors && res.data != null) {
+      return res.data['leaves'];
+    } else {
+      throw AppStateException('Failed to load team calendar.');
+    }
   }
 
   Future fetchWorkspaces() async {
@@ -139,7 +150,7 @@ class AppState {
         int wsId = await storage.getWorkspace();
         if (wsId == null && tmpWorkspaces.length == 1) {
           storage.setWorkspace(tmpWorkspaces[0].id);
-        } 
+        }
         workspaces = tmpWorkspaces;
       }
     } else {

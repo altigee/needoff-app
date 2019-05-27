@@ -5,6 +5,9 @@ import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
+import 'package:needoff/app_state.dart' show appState, AppStateException;
+import 'package:needoff/parts/app_scaffold.dart';
+import 'package:needoff/utils/ui.dart';
 
 class TeamCalendar extends StatefulWidget {
   @override
@@ -16,6 +19,16 @@ class _TeamCalendarState extends State<TeamCalendar> {
   List get _currentLeaves => _leaves[_currentDate];
   bool get _hasCurrentLeaves => _currentLeaves != null;
 
+  bool _isLoading = false;
+  bool get loading => _isLoading;
+  set loading(val) {
+    setState((){
+      _isLoading = val;
+    });
+  }
+
+  final _scaffKey = GlobalKey<ScaffoldState>();
+
   void _setDate(DateTime date, List<Event> events) {
     setState(() {
       _currentDate = _currentDate == date ? null : date;
@@ -23,11 +36,28 @@ class _TeamCalendarState extends State<TeamCalendar> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    loading = true;
+    appState.fetchTeamLeaves()
+    .then((res){
+      print(res);
+    })
+    .catchError((e) {
+      if (e is AppStateException) {
+        snack(_scaffKey.currentState, e.message);
+      } else {
+        snack(_scaffKey.currentState, 'Something went wrong :(');
+      }
+    });
+    loading = false;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Team Calendar'),
-      ),
+    return AppScaffold(
+      'Team Calendar',
+      key: _scaffKey,
       body: Container(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -38,6 +68,11 @@ class _TeamCalendarState extends State<TeamCalendar> {
   }
 
   Widget _buildCalendar() {
+    Color accent = Theme.of(context).accentColor;
+    Color primary = Theme.of(context).primaryColor;
+    TextStyle ts =
+        TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w500);
+    TextStyle tsa = ts.copyWith(color: accent);
     return Expanded(
       flex: 1,
       child: Container(
@@ -46,13 +81,22 @@ class _TeamCalendarState extends State<TeamCalendar> {
           onDayPressed: _setDate,
           weekFormat: _hasCurrentLeaves,
           markedDatesMap: _markedDateMap,
+          markedDateMoreCustomTextStyle: tsa,
+          markedDateShowIcon: false,
+          markedDateIconBuilder: (event) {
+            return event.icon ?? Container();
+          },
           selectedDateTime: _currentDate,
           daysHaveCircularBorder: true,
           todayTextStyle: TextStyle(color: Colors.black),
           todayButtonColor: Colors.blueGrey[100],
           todayBorderColor: Colors.blueGrey[100],
-          weekendTextStyle: TextStyle(color: Colors.red),
-          markedDateMoreCustomTextStyle: TextStyle(color: Colors.red),
+          weekendTextStyle: tsa,
+          daysTextStyle: ts,
+          weekdayTextStyle: tsa,
+          headerTextStyle: ts.copyWith(
+              color: primary, fontWeight: FontWeight.w900, fontSize: 24),
+          iconColor: primary,
         ),
       ),
     );
@@ -92,13 +136,6 @@ class _TeamCalendarState extends State<TeamCalendar> {
       ),
     );
 
-    const TypeColor = {
-      LeaveType.vacation: Colors.blueGrey,
-      LeaveType.dayoff: Colors.blueGrey,
-      LeaveType.illness: Colors.deepOrange,
-      LeaveType.wfh: Colors.grey
-    };
-
     String _daysLabel =
         Intl.plural(_days, one: '$_days day', other: '$_days days');
 
@@ -111,7 +148,7 @@ class _TeamCalendarState extends State<TeamCalendar> {
       ),
       onTap: () {
         Navigator.of(context)
-            .pushNamed('/person_leaves', arguments: {'user': _user});
+            .pushNamed('/person-leaves', arguments: {'user': _user});
       },
     );
   }
@@ -120,8 +157,28 @@ class _TeamCalendarState extends State<TeamCalendar> {
   EventList<Event> _markedDateMap = new EventList<Event>(
     events: {
       new DateTime(2019, DateTime.may, 20): [
-        new Event(date: new DateTime(2019, DateTime.may, 20)),
-        new Event(date: new DateTime(2019, DateTime.may, 20)),
+        new Event(
+            date: new DateTime(2019, DateTime.may, 20),
+            icon: Container(
+              width: 8,
+              height: 8,
+              margin: EdgeInsets.only(right: 4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                color: TypeColor[LeaveType.illness],
+              ),
+            )),
+        new Event(
+            date: new DateTime(2019, DateTime.may, 20),
+            title: 'test',
+            icon: Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                color: TypeColor[LeaveType.vacation],
+              ),
+            )),
         new Event(date: new DateTime(2019, DateTime.may, 20)),
       ],
       new DateTime(2019, DateTime.may, 21): [
@@ -158,4 +215,11 @@ const LeaveTypeLabel = {
   LeaveType.dayoff: 'Day Off',
   LeaveType.illness: 'Ilness',
   LeaveType.wfh: 'Work from home',
+};
+
+const TypeColor = {
+  LeaveType.vacation: Colors.blueGrey,
+  LeaveType.dayoff: Colors.blueGrey,
+  LeaveType.illness: Colors.deepOrange,
+  LeaveType.wfh: Colors.grey
 };

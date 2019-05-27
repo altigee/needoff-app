@@ -41,8 +41,8 @@ class MyApp extends StatelessWidget {
         '/forgot-pwd': (BuildContext context) => ForgotPasswordScreen(),
         '/workspaces': (BuildContext context) => WorkspacesScreen(),
         '/workspace-edit': (BuildContext context) => WorkspaceEditScreen(),
-        '/team_calendar': (BuildContext context) => TeamCalendar(),
-        '/person_leaves': (BuildContext context) => PersonLeaves(),
+        '/team-calendar': (BuildContext context) => TeamCalendar(),
+        '/person-leaves': (BuildContext context) => PersonLeaves(),
       },
       initialRoute: '/',
     );

@@ -14,7 +14,7 @@ class SickLeavesScreen extends StatefulWidget {
 
 class _SickLeavesScreenState extends State<SickLeavesScreen> {
   bool _addSickDialogOpened = false;
-  final String sickLeaveType = 'LEAVE_SICK_LEAVE';
+  final String sickLeaveType = 'SICK_LEAVE';
   GlobalKey _scaffoldKey = GlobalKey<ScaffoldState>();
 
   _listOrEmptyMsg() {

@@ -11,3 +11,10 @@ class Leave {
   DateTime get endDate => _endDate;
   String get comment => _comment;
 }
+
+class LeaveTypes {
+  static const SICK_LEAVE = 'SICK_LEAVE';
+  static const VACATION = 'VACATION_PAID';
+  static const WFH = 'WFH';
+  static const DAY_OFF = 'VACATION_UNPAID';
+}

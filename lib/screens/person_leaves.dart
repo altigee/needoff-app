@@ -13,7 +13,7 @@ class _PersonLeavesState extends State<PersonLeaves> {
     // print(_leaves);
 
     Map _args = ModalRoute.of(context).settings.arguments;
-    Map _userName = Map.from(_args)['user']['name'];
+    String _userName = Map.from(_args)['user']['name'];
 
     return Scaffold(
       appBar: AppBar(

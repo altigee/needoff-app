@@ -8,6 +8,8 @@ import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:needoff/app_state.dart' show appState, AppStateException;
 import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/utils/ui.dart';
+import 'package:needoff/models/leave.dart'
+    show LeaveTypes, LeaveTypeColors, LeaveTypeLabels;
 
 class TeamCalendar extends StatefulWidget {
   @override
@@ -16,16 +18,17 @@ class TeamCalendar extends StatefulWidget {
 
 class _TeamCalendarState extends State<TeamCalendar> {
   DateTime _currentDate;
-  List get _currentLeaves => _leaves[_currentDate];
-  bool get _hasCurrentLeaves => _currentLeaves != null;
 
   bool _isLoading = false;
   bool get loading => _isLoading;
   set loading(val) {
-    setState((){
+    setState(() {
       _isLoading = val;
     });
   }
+
+  EventList<Event> _eventList;
+  Map<DateTime, List> _leavesByDate;
 
   final _scaffKey = GlobalKey<ScaffoldState>();
 
@@ -39,11 +42,11 @@ class _TeamCalendarState extends State<TeamCalendar> {
   void initState() {
     super.initState();
     loading = true;
-    appState.fetchTeamLeaves()
-    .then((res){
+    appState.fetchTeamLeaves().then((res) {
       print(res);
-    })
-    .catchError((e) {
+      _mapToEvents(res);
+      setState(() {});
+    }).catchError((e) {
       if (e is AppStateException) {
         snack(_scaffKey.currentState, e.message);
       } else {
@@ -53,17 +56,78 @@ class _TeamCalendarState extends State<TeamCalendar> {
     loading = false;
   }
 
+  _buildEventIcon(color) {
+    return Container(
+      width: 4,
+      height: 4,
+      margin: EdgeInsets.only(right: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(100),
+        color: color,
+      ),
+    );
+  }
+
+  _mapToEvents(data) {
+    Map<String, List> leavesByType = {
+      LeaveTypes.SICK_LEAVE: [],
+      LeaveTypes.VACATION: [],
+      LeaveTypes.DAY_OFF: [],
+      LeaveTypes.WFH: [],
+    };
+
+    for (var item in data) {
+      if (leavesByType[item['leaveType']] != null) {
+        leavesByType[item['leaveType']].add(item);
+      }
+    }
+
+    _eventList = EventList<Event>(events: {});
+    _leavesByDate = {};
+
+    Map<String, List> addedTypes = {};
+
+    for (var type in leavesByType.keys) {
+      addedTypes[type] = [];
+      for (var leave in leavesByType[type]) {
+        DateTime d = DateTime.parse(leave['startDate']);
+        if (_leavesByDate[d] == null) {
+          _leavesByDate[d] = [];
+        }
+        _leavesByDate[d].add(leave);
+        if (addedTypes[type].contains(d)) {
+          continue; // no need to add more then 1 event of specific leave type for one day
+        }
+        _eventList.add(
+            d,
+            Event(
+              date: d,
+              icon: _buildEventIcon(LeaveTypeColors[type]),
+            ));
+        addedTypes[type].add(d);
+      }
+    }
+
+    print(leavesByType);
+    print("---------");
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       'Team Calendar',
       key: _scaffKey,
-      body: Container(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[_buildCalendar(), Divider(), _buildEvents()],
-        ),
-      ),
+      body: loading
+          ? Center(child: CircularProgressIndicator())
+          : Container(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _buildCalendar(),
+                  if (_currentDate != null) ...[Divider(), _buildEvents()]
+                ],
+              ),
+            ),
     );
   }
 
@@ -79,8 +143,8 @@ class _TeamCalendarState extends State<TeamCalendar> {
         margin: EdgeInsets.symmetric(horizontal: 16.0),
         child: CalendarCarousel<Event>(
           onDayPressed: _setDate,
-          weekFormat: _hasCurrentLeaves,
-          markedDatesMap: _markedDateMap,
+          weekFormat: _currentDate != null,
+          markedDatesMap: _eventList,
           markedDateMoreCustomTextStyle: tsa,
           markedDateShowIcon: false,
           markedDateIconBuilder: (event) {
@@ -89,11 +153,14 @@ class _TeamCalendarState extends State<TeamCalendar> {
           selectedDateTime: _currentDate,
           daysHaveCircularBorder: true,
           todayTextStyle: TextStyle(color: Colors.black),
-          todayButtonColor: Colors.blueGrey[100],
-          todayBorderColor: Colors.blueGrey[100],
+          todayButtonColor: Colors.blueGrey[50],
+          todayBorderColor: Colors.blueGrey[50],
           weekendTextStyle: tsa,
           daysTextStyle: ts,
           weekdayTextStyle: tsa,
+          selectedDayButtonColor: null,
+          selectedDayBorderColor: primary,
+          selectedDayTextStyle: ts.copyWith(color: primary),
           headerTextStyle: ts.copyWith(
               color: primary, fontWeight: FontWeight.w900, fontSize: 24),
           iconColor: primary,
@@ -103,30 +170,52 @@ class _TeamCalendarState extends State<TeamCalendar> {
   }
 
   Widget _buildEvents() {
-    if (_currentLeaves == null) {
-      return Container();
-    }
+    List dayLeaves = _leavesByDate[_currentDate] ?? [];
 
-    List<Widget> _events = _currentLeaves.map((leave) {
+    List<Widget> _events = dayLeaves.map((leave) {
       return _buildUser(leave);
     }).toList();
 
     return Expanded(
       flex: 3,
       child: Container(
-        child: ListView(children: _events),
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 20,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  IconButton(
+                    iconSize: 16,
+                    color: Colors.grey,
+                    onPressed: () {
+                      setState(() {
+                        _currentDate = null;
+                      });
+                    },
+                    icon: Icon(Icons.close),
+                  )
+                ],
+              ),
+            ),
+            Expanded(
+                child: dayLeaves.length > 0
+                    ? ListView(children: _events)
+                    : Center(child: Text('No entries.', style: Theme.of(context).textTheme.body1))),
+          ],
+        ),
         margin: EdgeInsets.symmetric(horizontal: 16),
       ),
     );
   }
 
   Widget _buildUser(leave) {
-    Map _leave = leave["leave"];
-    Map _user = leave["user"];
+    Map user = leave["user"];
+    int days = 2;
+    var type = leave['leaveType'];
 
-    LeaveType _leaveType = _leave["type"];
-    String _userInits = _user["name"][0];
-    int _days = _leave["days"];
+    String _userInits = user["name"] ?? user['email'][0];
 
     Widget _userAvatar = CircleAvatar(
       backgroundColor: Colors.grey.shade300,
@@ -136,90 +225,32 @@ class _TeamCalendarState extends State<TeamCalendar> {
       ),
     );
 
-    String _daysLabel =
-        Intl.plural(_days, one: '$_days day', other: '$_days days');
+    String typeLabel = LeaveTypeLabels[type];
+    String daysLabel = Intl.plural(days, one: '$days day', other: '$days days');
 
     return ListTile(
       leading: _userAvatar,
-      title: Text('${_user["name"]}'),
-      subtitle: Text(
-        '${LeaveTypeLabel[_leaveType]} - ($_daysLabel)',
-        style: TextStyle(color: TypeColor[_leaveType]),
+      title: Text('${user["email"]}'),
+      subtitle: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            '$typeLabel - ($daysLabel)',
+            style: TextStyle(color: LeaveTypeColors[type]),
+          ),
+          Text(
+            leave['comment'] ?? '',
+            style: Theme.of(context).textTheme.caption,
+          )
+        ],
       ),
+      isThreeLine: true,
+
       onTap: () {
         Navigator.of(context)
-            .pushNamed('/person-leaves', arguments: {'user': _user});
+            .pushNamed('/person-leaves', arguments: {'user': user});
       },
     );
   }
-
-  // MOCKED DATA
-  EventList<Event> _markedDateMap = new EventList<Event>(
-    events: {
-      new DateTime(2019, DateTime.may, 20): [
-        new Event(
-            date: new DateTime(2019, DateTime.may, 20),
-            icon: Container(
-              width: 8,
-              height: 8,
-              margin: EdgeInsets.only(right: 4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100),
-                color: TypeColor[LeaveType.illness],
-              ),
-            )),
-        new Event(
-            date: new DateTime(2019, DateTime.may, 20),
-            title: 'test',
-            icon: Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100),
-                color: TypeColor[LeaveType.vacation],
-              ),
-            )),
-        new Event(date: new DateTime(2019, DateTime.may, 20)),
-      ],
-      new DateTime(2019, DateTime.may, 21): [
-        new Event(date: new DateTime(2019, DateTime.may, 21)),
-      ],
-      new DateTime(2019, DateTime.may, 22): [
-        new Event(date: new DateTime(2019, DateTime.may, 22)),
-        new Event(date: new DateTime(2019, DateTime.may, 22)),
-      ],
-    },
-  );
-
-  Map _leaves = {
-    new DateTime(2019, DateTime.may, 20): [
-      {
-        "user": {"name": 'Vasiliy Grigorovic'},
-        "leave": {"type": LeaveType.illness, "days": 4}
-      },
-      {
-        "user": {"name": 'Ben Maksymenko'},
-        "leave": {"type": LeaveType.dayoff, "days": 1}
-      },
-      {
-        "user": {"name": 'Konan Varvarius'},
-        "leave": {"type": LeaveType.vacation, "days": 13}
-      },
-    ]
-  };
 }
-
-enum LeaveType { vacation, dayoff, illness, wfh }
-const LeaveTypeLabel = {
-  LeaveType.vacation: 'Vacation',
-  LeaveType.dayoff: 'Day Off',
-  LeaveType.illness: 'Ilness',
-  LeaveType.wfh: 'Work from home',
-};
-
-const TypeColor = {
-  LeaveType.vacation: Colors.blueGrey,
-  LeaveType.dayoff: Colors.blueGrey,
-  LeaveType.illness: Colors.deepOrange,
-  LeaveType.wfh: Colors.grey
-};

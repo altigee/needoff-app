@@ -47,6 +47,7 @@ query TeamCalendar {
     userId,
     startDate,
     endDate,
+    comment,
     user {
       firstName,
       lastName,

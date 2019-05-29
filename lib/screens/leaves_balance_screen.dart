@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:needoff/parts/app_scaffold.dart';
 
-class LeavesScreen extends StatefulWidget {
+class LeavesBalanceScreen extends StatefulWidget {
   @override
-  _LeavesScreenState createState() => _LeavesScreenState();
+  _LeavesBalanceScreenState createState() => _LeavesBalanceScreenState();
 }
 
-class _LeavesScreenState extends State<LeavesScreen> {
+class _LeavesBalanceScreenState extends State<LeavesBalanceScreen> {
   Widget _btnMore({VoidCallback onPressed}) {
     return FlatButton(
       onPressed: onPressed,
@@ -61,7 +61,7 @@ class _LeavesScreenState extends State<LeavesScreen> {
                 ),
                 onPressed: () {
                   Navigator.of(context).pushNamed('/leaves/sick', arguments: {
-                    'addSickToday': true,
+                    'addLeave': true,
                   });
                 },
               ),

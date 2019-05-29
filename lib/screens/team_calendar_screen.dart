@@ -10,22 +10,15 @@ import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/utils/ui.dart';
 import 'package:needoff/models/leave.dart'
     show LeaveTypes, LeaveTypeColors, LeaveTypeLabels;
+import 'package:needoff/parts/widget_mixins.dart' show LoadingState;
 
 class TeamCalendar extends StatefulWidget {
   @override
   _TeamCalendarState createState() => _TeamCalendarState();
 }
 
-class _TeamCalendarState extends State<TeamCalendar> {
+class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
   DateTime _currentDate;
-
-  bool _isLoading = false;
-  bool get loading => _isLoading;
-  set loading(val) {
-    setState(() {
-      _isLoading = val;
-    });
-  }
 
   EventList<Event> _eventList;
   Map<DateTime, List> _leavesByDate;
@@ -52,15 +45,18 @@ class _TeamCalendarState extends State<TeamCalendar> {
       } else {
         snack(_scaffKey.currentState, 'Something went wrong :(');
       }
+    }).whenComplete(() {
+      setState(() {
+        loading = false;
+      });
     });
-    loading = false;
   }
 
   _buildEventIcon(color) {
     return Container(
       width: 4,
       height: 4,
-      margin: EdgeInsets.only(right: 4),
+      margin: EdgeInsets.only(right: 2, left: 2),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(100),
         color: color,

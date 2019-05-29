@@ -4,28 +4,23 @@ import 'package:needoff/models/workspace.dart';
 import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/app_state.dart' show appState, AppStateException;
 import 'package:needoff/utils/ui.dart';
+import 'package:needoff/parts/widget_mixins.dart' show LoadingState;
 
 class WorkspaceEditScreen extends StatefulWidget {
   @override
   _WorkspaceEditScreenState createState() => _WorkspaceEditScreenState();
 }
 
-class _WorkspaceEditScreenState extends State<WorkspaceEditScreen> {
+class _WorkspaceEditScreenState extends State<WorkspaceEditScreen> with LoadingState {
   var id;
   List members = [];
-  bool _isLoading = false;
+
   bool _autovalidate = false;
   final _formKey = GlobalKey<FormState>();
   final _memberFormKey = GlobalKey<FormState>();
   TextEditingController _nameInpCtrl = TextEditingController();
   TextEditingController _descInpCtrl = TextEditingController();
   TextEditingController _memberInpCtrl = TextEditingController();
-
-  _loading(bool val) {
-    setState(() {
-      _isLoading = val;
-    });
-  }
 
   _handleAddMember() {
     if(_memberFormKey.currentState.validate()) {
@@ -69,7 +64,7 @@ class _WorkspaceEditScreenState extends State<WorkspaceEditScreen> {
       _autovalidate = true;
     });
     if (_formKey.currentState.validate()) {
-      _loading(true);
+      loading = true;
       try {
         await appState.addWorkspace(Workspace(
           _nameInpCtrl.text,
@@ -82,7 +77,7 @@ class _WorkspaceEditScreenState extends State<WorkspaceEditScreen> {
       } catch (e) {
         snack(_formKey.currentContext, 'Something went wrong :(');
       }
-      _loading(false);
+      loading = false;
     }
   }
 
@@ -174,7 +169,7 @@ class _WorkspaceEditScreenState extends State<WorkspaceEditScreen> {
               RaisedButton(
                 color: Theme.of(context).primaryColor,
                 textColor: Colors.white,
-                onPressed: _isLoading ? null : _handleCreateWorkspace,
+                onPressed: loading ? null : _handleCreateWorkspace,
                 child: Text('Create Workspace'),
               ),
             ],

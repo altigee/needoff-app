@@ -5,29 +5,25 @@ import 'package:needoff/models/credentials.dart';
 import 'package:needoff/app_state.dart' show appState, AppStateException;
 import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/utils/ui.dart';
+import 'package:needoff/parts/widget_mixins.dart' show LoadingState;
 
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with LoadingState {
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
 
   TextEditingController _emailCtrl =
       TextEditingController(text: '@alt.com');
   TextEditingController _pwdCtrl = TextEditingController(text: 'ssssss');
 
-  void _loading(bool val) {
-    setState(() {
-      _isLoading = val;
-    });
-  }
-
   Future _handleLogin() async {
     if (_formKey.currentState.validate()) {
-      _loading(true);
+      setState(() {
+        loading = true;
+      });
       try {
         await appState.signin(Credentials(_emailCtrl.text, _pwdCtrl.text));
         Navigator.of(context).pushReplacementNamed('/');
@@ -36,7 +32,9 @@ class _LoginScreenState extends State<LoginScreen> {
       } catch (e) {
         snack(_formKey.currentContext, 'Something went wrong :(');
       }
-      _loading(false);
+      setState(() {
+        loading = false;
+      });
     }
   }
 
@@ -86,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   RaisedButton(
                     color: Theme.of(context).primaryColor,
                     textColor: Colors.white,
-                    onPressed: _isLoading ? null : _handleLogin,
+                    onPressed: loading ? null : _handleLogin,
                     child: Text('Login'),
                   ),
                   Padding(

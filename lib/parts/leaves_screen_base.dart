@@ -5,20 +5,28 @@ import 'package:needoff/app_state.dart' show appState, AppStateException;
 import 'package:needoff/models/leave.dart';
 import 'package:needoff/utils/dates.dart';
 import 'package:needoff/parts/app_scaffold.dart';
+import 'package:needoff/parts/widget_mixins.dart' show LoadingState;
 import 'package:needoff/utils/ui.dart';
 
-class SickLeavesScreen extends StatefulWidget {
+
+class LeavesScreenBase extends StatefulWidget {
+  final String leaveType;
+  final String screenTitle;
+  LeavesScreenBase({String leaveType, String screenTitle, Key key})
+      : this.leaveType = leaveType,
+        this.screenTitle = screenTitle,
+        super(key: key);
   @override
-  _SickLeavesScreenState createState() => _SickLeavesScreenState();
+  _LeavesScreenBaseState createState() => _LeavesScreenBaseState();
 }
 
-class _SickLeavesScreenState extends State<SickLeavesScreen> {
-  bool _addSickDialogOpened = false;
-  final String sickLeaveType = 'SICK_LEAVE';
+class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
+  bool _addLeaveDialogOpened = false;
   GlobalKey _scaffoldKey = GlobalKey<ScaffoldState>();
+  List<Leave> _leaves = [];
 
   _listOrEmptyMsg() {
-    if (appState.leaves.length == 0) {
+    if ((_leaves ?? []).length == 0) {
       return Center(
         child: Text('No entries found.'),
       );
@@ -30,10 +38,7 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
   }
 
   List<Widget> _buildList() {
-    List<Leave> data = appState.leaves;
-    if (data == null) {
-      data = [];
-    }
+    List<Leave> data = _leaves ?? [];
     return data.map((item) {
       Duration diff = item.endDate.difference(item.startDate);
       String dates = '${formatDate(item.startDate)}';
@@ -48,7 +53,9 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Text(dates),
-            Text(days),
+            Text(days,
+                style: TextStyle(
+                    inherit: true, color: LeaveTypeColors[widget.leaveType])),
           ],
         ),
         subtitle: Text(item.comment ?? ''),
@@ -56,9 +63,8 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
     }).toList();
   }
 
-  Future _showAddSickDialog(context) async {
-    print('>> show add sick modal');
-    _addSickDialogOpened = true;
+  Future _showAddLeaveDialog(context) async {
+    _addLeaveDialogOpened = true;
     var result = await showDialog(
       context: context,
       builder: (BuildContext ctx) {
@@ -81,7 +87,7 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
                     var df = DateFormat.yMMMd();
                     Navigator.pop(
                         context,
-                        Leave(sickLeaveType, df.parse(_startInpCtrl.text),
+                        Leave(widget.leaveType, df.parse(_startInpCtrl.text),
                             df.parse(_endInpCtrl.text), _commentInpCtrl.text));
                   }
                 },
@@ -98,7 +104,7 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                "I'm sick :(",
+                "Choose timeframe",
                 style: Theme.of(context)
                     .textTheme
                     .title
@@ -121,8 +127,6 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
                           onTap: () async {
                             fn.unfocus();
                             var res = await _showDatePicker();
-                            print('[DATE SELECTED] :: ');
-                            print(res);
                             if (res != null) {
                               _startInpCtrl.text = formatDate(res);
                             }
@@ -131,15 +135,13 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
                           focusNode: fn,
                           enableInteractiveSelection: false,
                           decoration: InputDecoration(
-                            labelText: 'From:',
+                            labelText: 'First day:',
                           ),
                         ),
                         TextField(
                           onTap: () async {
                             fn.unfocus();
                             var res = await _showDatePicker();
-                            print('[DATE SELECTED] :: ');
-                            print(res);
                             if (res != null) {
                               _endInpCtrl.text = formatDate(res);
                             }
@@ -148,7 +150,7 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
                           focusNode: fn,
                           enableInteractiveSelection: false,
                           decoration: InputDecoration(
-                            labelText: 'To:',
+                            labelText: 'Last day:',
                           ),
                         ),
                         TextFormField(
@@ -172,7 +174,7 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
         );
       },
     );
-    _addSickDialogOpened = false;
+    _addLeaveDialogOpened = false;
     return result;
   }
 
@@ -184,11 +186,11 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
         initialDate: DateTime.now());
   }
 
-  _handleAddSick(context) async {
-    if (_addSickDialogOpened == true) {
+  _handleAddLeave(context) async {
+    if (_addLeaveDialogOpened == true) {
       return null;
     }
-    Leave newLeave = await _showAddSickDialog(context);
+    Leave newLeave = await _showAddLeaveDialog(context);
     if (newLeave != null) {
       try {
         await appState.addLeave(newLeave);
@@ -209,10 +211,12 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
       TextEditingController(text: formatDate(DateTime.now()));
   TextEditingController _endInpCtrl =
       TextEditingController(text: formatDate(DateTime.now()));
-  TextEditingController _commentInpCtrl = TextEditingController(text: 'test');
+  TextEditingController _commentInpCtrl = TextEditingController();
 
   void _updateListener() {
-    setState(() {});
+    setState(() {
+      _filterByType();
+    });
   }
 
   @override
@@ -224,15 +228,31 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
       Future.delayed(Duration(milliseconds: 100), () {
         print(args);
         try {
-          if (args != null && Map.from(args)['addSickToday'] == true) {
-            _handleAddSick(ctx);
+          if (args != null && Map.from(args)['addLeave'] == true) {
+            _handleAddLeave(ctx);
           }
         } catch (e) {}
       });
     });
 
     appState.changes.addListener(_updateListener);
-    appState.fetchLeaves();
+    loading = true;
+    appState.fetchLeaves().then((res) {
+      _filterByType();
+    }).catchError((e) {
+      if (e is AppStateException) {
+        snack(_scaffoldKey.currentState, e.message);
+      } else {
+        snack(_scaffoldKey.currentState, 'Something went wrong :(');
+      }
+    }).whenComplete(() {
+      loading = false;
+    });
+  }
+
+  void _filterByType() {
+    _leaves =
+        appState.leaves.where((item) => item.type == widget.leaveType).toList();
   }
 
   @override
@@ -244,15 +264,17 @@ class _SickLeavesScreenState extends State<SickLeavesScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      'sick days',
+      widget.screenTitle,
       key: _scaffoldKey,
       body: Container(
-        child: _listOrEmptyMsg(),
+        child: loading
+            ? Center(child: CircularProgressIndicator())
+            : _listOrEmptyMsg(),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).accentColor,
         onPressed: () {
-          _handleAddSick(context);
+          _handleAddLeave(context);
         },
         child: Icon(Icons.add),
       ),

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:needoff/app_state.dart' show appState;
-import 'package:needoff/screens/leaves_screen.dart';
-import 'package:needoff/screens/person_leaves.dart';
-import 'package:needoff/screens/sick_leaves_screen.dart';
-import 'package:needoff/screens/team_calendar.dart';
-import 'package:needoff/screens/vac_leaves_screen.dart';
-import 'package:needoff/screens/wfh_leaves_screen.dart';
+import 'package:needoff/screens/leaves_balance_screen.dart';
+import 'package:needoff/screens/person_leaves_screen.dart';
+import 'package:needoff/screens/team_calendar_screen.dart';
 import 'package:needoff/screens/start_screen.dart';
 import 'package:needoff/screens/login_screen.dart';
 import 'package:needoff/screens/registration_screen.dart';
@@ -15,6 +12,9 @@ import 'package:needoff/screens/profile_screen.dart';
 import 'package:needoff/screens/profile_edit_screen.dart';
 import 'package:needoff/screens/workspaces_screen.dart';
 import 'package:needoff/screens/workspace_edit_screen.dart';
+import 'package:needoff/parts/leaves_screen_base.dart';
+
+import 'package:needoff/models/leave.dart' show LeaveTypes;
 
 void main() => runApp(MyApp());
 
@@ -26,17 +26,25 @@ class MyApp extends StatelessWidget {
       theme: Theme.of(context).copyWith(
         primaryColor: Color(0xff030322),
         accentColor: Color(0xffff0033),
-        textTheme:
-            Theme.of(context).textTheme.apply(fontFamily: 'Montserrat'),
+        textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Montserrat'),
       ),
       routes: {
         '/': (BuildContext context) => Root(),
         '/profile': (BuildContext context) => ProfileScreen(),
         '/profile/edit': (BuildContext context) => ProfileEditScreen(),
-        '/leaves': (BuildContext context) => LeavesScreen(),
-        '/leaves/sick': (BuildContext context) => SickLeavesScreen(),
-        '/leaves/vac': (BuildContext context) => VacLeavesScreen(),
-        '/leaves/wfh': (BuildContext context) => WfhLeavesScreen(),
+        '/leaves': (BuildContext context) => LeavesBalanceScreen(),
+        '/leaves/sick': (BuildContext context) => LeavesScreenBase(
+              leaveType: LeaveTypes.SICK_LEAVE,
+              screenTitle: 'sick days',
+            ),
+        '/leaves/vac': (BuildContext context) => LeavesScreenBase(
+              leaveType: LeaveTypes.VACATION,
+              screenTitle: 'vacations',
+            ),
+        '/leaves/wfh': (BuildContext context) => LeavesScreenBase(
+              leaveType: LeaveTypes.WFH,
+              screenTitle: 'work from *',
+            ),
         '/registration': (BuildContext context) => RegistrationScreen(),
         '/forgot-pwd': (BuildContext context) => ForgotPasswordScreen(),
         '/workspaces': (BuildContext context) => WorkspacesScreen(),

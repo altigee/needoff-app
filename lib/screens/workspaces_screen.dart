@@ -4,21 +4,15 @@ import 'package:needoff/app_state.dart' show appState, AppStateException;
 import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/api/storage.dart' as storage;
 import 'package:needoff/utils/ui.dart';
+import 'package:needoff/parts/widget_mixins.dart' show LoadingState;
 
 class WorkspacesScreen extends StatefulWidget {
   @override
   _WorkspacesScreenState createState() => _WorkspacesScreenState();
 }
 
-class _WorkspacesScreenState extends State<WorkspacesScreen> {
+class _WorkspacesScreenState extends State<WorkspacesScreen> with LoadingState {
   int _activeWSId;
-  bool _loading = false;
-  bool get loading => _loading;
-  set loading(bool value) {
-    setState(() {
-      _loading = value;
-    });
-  }
 
   final _scaffKey = GlobalKey<ScaffoldState>();
 

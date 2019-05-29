@@ -19,8 +19,21 @@ class AppStateException implements Exception {
 }
 
 class AppStateNotifier extends ChangeNotifier {
+  List _listenersList = [];
   notify() {
     notifyListeners();
+  }
+
+  @override
+  void addListener(listener) {
+    _listenersList.add(listener);
+    super.addListener(listener);
+  }
+
+  void removeAllListeners() {
+    for(var listener in _listenersList) {
+      super.removeListener(listener);
+    }
   }
 }
 
@@ -82,6 +95,9 @@ class AppState {
     storage.removeToken();
     storage.removeWorkspace();
     profile = null;
+    leaves = null;
+    workspaces = null;
+    _changes.removeAllListeners();
   }
 
   Future fetchProfile() async {
@@ -109,6 +125,7 @@ class AppState {
           ));
         }
         leaves = tmpLeaves;
+        return leaves;
       }
     } else {
       leaves = [];
@@ -152,6 +169,7 @@ class AppState {
           storage.setWorkspace(tmpWorkspaces[0].id);
         }
         workspaces = tmpWorkspaces;
+        return workspaces;
       }
     } else {
       workspaces = [];

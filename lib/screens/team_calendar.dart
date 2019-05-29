@@ -90,26 +90,31 @@ class _TeamCalendarState extends State<TeamCalendar> {
     for (var type in leavesByType.keys) {
       addedTypes[type] = [];
       for (var leave in leavesByType[type]) {
-        DateTime d = DateTime.parse(leave['startDate']);
-        if (_leavesByDate[d] == null) {
-          _leavesByDate[d] = [];
+        DateTime startDate = DateTime.parse(leave['startDate']);
+        DateTime endDate = DateTime.parse(leave['endDate']);
+        int duration = endDate.difference(startDate).inDays + 1;
+        if (duration < 0) {
+          continue;
         }
-        _leavesByDate[d].add(leave);
-        if (addedTypes[type].contains(d)) {
-          continue; // no need to add more then 1 event of specific leave type for one day
+        for (var i = 0; i < duration; i++) {
+          DateTime d = startDate.add(Duration(days: i));
+          if (d.weekday > 5) continue; //skip weekend
+          if (_leavesByDate[d] == null) {
+            _leavesByDate[d] = [];
+          }
+          _leavesByDate[d].add(leave);
+          if (!addedTypes[type].contains(d)) {
+            _eventList.add(
+                d,
+                Event(
+                  date: d,
+                  icon: _buildEventIcon(LeaveTypeColors[type]),
+                ));
+            addedTypes[type].add(d);
+          }
         }
-        _eventList.add(
-            d,
-            Event(
-              date: d,
-              icon: _buildEventIcon(LeaveTypeColors[type]),
-            ));
-        addedTypes[type].add(d);
       }
     }
-
-    print(leavesByType);
-    print("---------");
   }
 
   @override
@@ -202,7 +207,9 @@ class _TeamCalendarState extends State<TeamCalendar> {
             Expanded(
                 child: dayLeaves.length > 0
                     ? ListView(children: _events)
-                    : Center(child: Text('No entries.', style: Theme.of(context).textTheme.body1))),
+                    : Center(
+                        child: Text('No entries.',
+                            style: Theme.of(context).textTheme.body1))),
           ],
         ),
         margin: EdgeInsets.symmetric(horizontal: 16),
@@ -246,7 +253,6 @@ class _TeamCalendarState extends State<TeamCalendar> {
         ],
       ),
       isThreeLine: true,
-
       onTap: () {
         Navigator.of(context)
             .pushNamed('/person-leaves', arguments: {'user': user});

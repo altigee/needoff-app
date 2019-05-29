@@ -21,7 +21,7 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
   DateTime _currentDate;
 
   EventList<Event> _eventList;
-  Map<DateTime, List> _leavesByDate;
+  Map<DateTime, List> _leavesByDate = {};
 
   final _scaffKey = GlobalKey<ScaffoldState>();
 
@@ -139,7 +139,7 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
         TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w500);
     TextStyle tsa = ts.copyWith(color: accent);
     return Expanded(
-      flex: 1,
+      flex: 2,
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 16.0),
         child: CalendarCarousel<Event>(
@@ -178,7 +178,7 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
     }).toList();
 
     return Expanded(
-      flex: 3,
+      flex: 5,
       child: Container(
         child: Column(
           children: <Widget>[

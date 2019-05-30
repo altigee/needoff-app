@@ -8,7 +8,6 @@ import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/parts/widget_mixins.dart' show LoadingState;
 import 'package:needoff/utils/ui.dart';
 
-
 class LeavesScreenBase extends StatefulWidget {
   final String leaveType;
   final String screenTitle;
@@ -65,6 +64,7 @@ class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
 
   Future _showAddLeaveDialog(context) async {
     _addLeaveDialogOpened = true;
+    var df = DateFormat.yMMMd();
     var result = await showDialog(
       context: context,
       builder: (BuildContext ctx) {
@@ -84,7 +84,6 @@ class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
                   print('ok');
                   if (_formKey.currentState.validate()) {
                     // if (Form.of(context).validate()) {
-                    var df = DateFormat.yMMMd();
                     Navigator.pop(
                         context,
                         Leave(widget.leaveType, df.parse(_startInpCtrl.text),
@@ -126,7 +125,8 @@ class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
                         TextField(
                           onTap: () async {
                             fn.unfocus();
-                            var res = await _showDatePicker();
+                            var res = await _showDatePicker(
+                                max: df.parse(_endInpCtrl.text));
                             if (res != null) {
                               _startInpCtrl.text = formatDate(res);
                             }
@@ -141,7 +141,8 @@ class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
                         TextField(
                           onTap: () async {
                             fn.unfocus();
-                            var res = await _showDatePicker();
+                            var res = await _showDatePicker(
+                                min: df.parse(_startInpCtrl.text));
                             if (res != null) {
                               _endInpCtrl.text = formatDate(res);
                             }
@@ -178,12 +179,22 @@ class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
     return result;
   }
 
-  Future _showDatePicker() {
+  Future _showDatePicker({DateTime min, DateTime max}) {
+    print(min);
+    print(max);
+    var now = DateTime.now();
+    var today = DateTime.utc(now.year, now.month, now.day);
+    var first = min ?? today;
+    var last =  max ?? today.add(Duration(days: 365));
+    var initial = min ?? today;
+    print(first);
+    print(last);
+    print(initial);
     return showDatePicker(
         context: context,
-        firstDate: DateTime.now(),
-        lastDate: DateTime(2020),
-        initialDate: DateTime.now());
+        firstDate: first,
+        lastDate: last,
+        initialDate: initial);
   }
 
   _handleAddLeave(context) async {

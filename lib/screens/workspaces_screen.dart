@@ -18,8 +18,11 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> with LoadingState {
 
   _listOrEmptyMsg() {
     if (appState.workspaces.length == 0) {
-      return Center(
-        child: Text('No entries found.'),
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+            height: MediaQuery.of(context).size.height,
+            child: Center(child: Text('No entries found.'))),
       );
     }
     return ListView(
@@ -102,12 +105,18 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> with LoadingState {
     return AppScaffold(
       'workspaces',
       key: _scaffKey,
-      body: Center(
-        child: loading
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : _listOrEmptyMsg(),
+      body: RefreshIndicator(
+        onRefresh: () {
+          print('r e f r e s h');
+          return appState.fetchWorkspaces();
+        },
+        child: Center(
+          child: loading
+              ? Center(
+                  child: CircularProgressIndicator(),
+                )
+              : _listOrEmptyMsg(),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).accentColor,

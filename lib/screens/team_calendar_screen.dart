@@ -35,7 +35,15 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
   void initState() {
     super.initState();
     loading = true;
-    appState.fetchTeamLeaves().then((res) {
+    _makeEvents().whenComplete(() {
+      setState(() {
+        loading = false;
+      });
+    });
+  }
+
+  Future<dynamic> _makeEvents() {
+    return appState.fetchTeamLeaves().then((res) {
       print(res);
       _mapToEvents(res);
       setState(() {});
@@ -45,10 +53,6 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
       } else {
         snack(_scaffKey.currentState, 'Something went wrong :(');
       }
-    }).whenComplete(() {
-      setState(() {
-        loading = false;
-      });
     });
   }
 
@@ -120,13 +124,22 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
       key: _scaffKey,
       body: loading
           ? Center(child: CircularProgressIndicator())
-          : Container(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  _buildCalendar(),
-                  if (_currentDate != null) ...[Divider(), _buildEvents()]
-                ],
+          : RefreshIndicator(
+              onRefresh: () {
+                return _makeEvents();
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      _buildCalendar(),
+                      if (_currentDate != null) ...[Divider(), _buildEvents()]
+                    ],
+                  ),
+                ),
               ),
             ),
     );

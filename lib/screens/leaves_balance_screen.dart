@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:needoff/models/leave.dart' show LeaveTypes, LeaveTypeColors;
 import 'package:needoff/parts/app_scaffold.dart';
 
 class LeavesBalanceScreen extends StatefulWidget {
@@ -41,12 +42,10 @@ class _LeavesBalanceScreenState extends State<LeavesBalanceScreen> {
             'Sick days:',
             style: Theme.of(context).textTheme.headline,
           ),
-          Text(
-            '9',
-            style: Theme.of(context)
-                .textTheme
-                .display1
-                .copyWith(color: Theme.of(context).accentColor),
+          BalanceRemaining(
+            type: LeaveTypes.SICK_LEAVE,
+            total: 8,
+            left: 5,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -81,12 +80,10 @@ class _LeavesBalanceScreenState extends State<LeavesBalanceScreen> {
             'Vacations:',
             style: Theme.of(context).textTheme.headline,
           ),
-          Text(
-            '12',
-            style: Theme.of(context)
-                .textTheme
-                .display1
-                .copyWith(color: Theme.of(context).accentColor),
+          BalanceRemaining(
+            type: LeaveTypes.VACATION,
+            total: 18,
+            left: 10,
           ),
           _btnMore(onPressed: () {
             Navigator.of(context).pushNamed('/leaves/vac');
@@ -99,12 +96,12 @@ class _LeavesBalanceScreenState extends State<LeavesBalanceScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(
-            'WFH',
+            'WF*',
             style: Theme.of(context).textTheme.headline,
           ),
           Icon(
             Icons.all_inclusive,
-            color: Theme.of(context).accentColor,
+            color: LeaveTypeColors[LeaveTypes.WFH],
             size: 32,
           ),
           _btnMore(onPressed: () {
@@ -128,6 +125,53 @@ class _LeavesBalanceScreenState extends State<LeavesBalanceScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class BalanceRemaining extends StatelessWidget {
+  final String type;
+  final int total;
+  final int left;
+  const BalanceRemaining({
+    @required type,
+    @required total,
+    @required left,
+    Key key,
+  })  : this.type = type,
+        this.total = total,
+        this.left = left,
+        super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Container(
+            width: 50,
+            child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'left',
+                  style: Theme.of(context).textTheme.caption,
+                ))),
+        Text(
+          '$left',
+          style: Theme.of(context)
+              .textTheme
+              .display1
+              .copyWith(color: LeaveTypeColors[type]),
+        ),
+        Container(
+            width: 50,
+            child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  ' of $total',
+                  style: Theme.of(context).textTheme.caption,
+                )))
+      ],
     );
   }
 }

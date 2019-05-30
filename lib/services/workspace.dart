@@ -32,3 +32,25 @@ query MyWorkspaces {
   ''');
   return res;
 }
+
+fetchWorkspace(int id) async {
+  QueryResult res = await gql.rawQuery('''
+query LoadWorkspace {
+  info: workspaceById(workspaceId: $id) {
+    id,
+    name,
+    description,
+  }
+  invitations: workspaceInvitations(workspaceId: $id) {
+    id,
+    email,
+    status
+  }
+  calendars: workspaceCalendars(workspaceId: $id) {
+    name
+  }
+}
+  ''');
+
+  return res;
+}

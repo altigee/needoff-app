@@ -11,7 +11,8 @@ import 'package:needoff/screens/forgot_password_screen.dart';
 import 'package:needoff/screens/profile_screen.dart';
 import 'package:needoff/screens/profile_edit_screen.dart';
 import 'package:needoff/screens/workspaces_screen.dart';
-import 'package:needoff/screens/workspace_edit_screen.dart';
+import 'package:needoff/screens/workspace_create_screen.dart';
+import 'package:needoff/screens/workspace_profile_screen.dart';
 import 'package:needoff/parts/leaves_screen_base.dart';
 
 import 'package:needoff/models/leave.dart' show LeaveTypes;
@@ -48,7 +49,8 @@ class MyApp extends StatelessWidget {
         '/registration': (BuildContext context) => RegistrationScreen(),
         '/forgot-pwd': (BuildContext context) => ForgotPasswordScreen(),
         '/workspaces': (BuildContext context) => WorkspacesScreen(),
-        '/workspace-edit': (BuildContext context) => WorkspaceEditScreen(),
+        '/workspace-edit': (BuildContext context) => WorkspaceCreateScreen(),
+        '/workspace-profile': (BuildContext context) => WorkspaceProfileScreen(),
         '/team-calendar': (BuildContext context) => TeamCalendar(),
         '/person-leaves': (BuildContext context) => PersonLeaves(),
       },

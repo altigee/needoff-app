@@ -6,12 +6,12 @@ import 'package:needoff/app_state.dart' show appState, AppStateException;
 import 'package:needoff/utils/ui.dart';
 import 'package:needoff/parts/widget_mixins.dart' show LoadingState;
 
-class WorkspaceEditScreen extends StatefulWidget {
+class WorkspaceCreateScreen extends StatefulWidget {
   @override
-  _WorkspaceEditScreenState createState() => _WorkspaceEditScreenState();
+  _WorkspaceCreateScreenState createState() => _WorkspaceCreateScreenState();
 }
 
-class _WorkspaceEditScreenState extends State<WorkspaceEditScreen> with LoadingState {
+class _WorkspaceCreateScreenState extends State<WorkspaceCreateScreen> with LoadingState {
   var id;
   List members = [];
 

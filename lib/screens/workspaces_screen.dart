@@ -39,6 +39,8 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> with LoadingState {
           setState(() {
             _activeWSId = id;
           });
+          Navigator.of(context)
+              .pushNamed('/workspace-profile', arguments: {'id': id});
         }
       } catch (e) {
         print('![ERROR] Can not set active workspace');
@@ -76,21 +78,18 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> with LoadingState {
     super.initState();
     storage.changes.addListener(_updateStateListener);
     appState.changes.addListener(_updateStateListener);
-  }
-
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-    loading = true;
-    try {
-      await appState.fetchWorkspaces();
-      _activeWSId = await storage.getWorkspace();
-    } on AppStateException catch (e) {
-      snack(_scaffKey.currentState, e.message);
-    } catch (e) {
-      snack(_scaffKey.currentState, 'Something went wrong');
-    }
-    loading = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      loading = true;
+      try {
+        await appState.fetchWorkspaces();
+        _activeWSId = await storage.getWorkspace();
+      } on AppStateException catch (e) {
+        snack(_scaffKey.currentState, e.message);
+      } catch (e) {
+        snack(_scaffKey.currentState, 'Something went wrong');
+      }
+      loading = false;
+    });
   }
 
   @override

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:needoff/models/workspace.dart' show Workspace;
 import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/services/workspace.dart' as workspaceServ;
 import 'package:needoff/utils/ui.dart';
+import 'package:needoff/parts/workspace_profile.dart'
+    show WorkspaceInfoView, WorkspaceInvitationsView;
 
 class WorkspaceProfileScreen extends StatefulWidget {
   @override
@@ -10,6 +13,8 @@ class WorkspaceProfileScreen extends StatefulWidget {
 
 class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen> {
   GlobalKey _scaffKey = GlobalKey<ScaffoldState>();
+  Map _wsData;
+  Workspace _workspace;
   @override
   void initState() {
     super.initState();
@@ -22,18 +27,61 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen> {
             snack(_scaffKey.currentState, 'Failed to load workspace data.');
           } else {
             print(res.data);
+            _wsData = res.data;
+            _workspace =
+                Workspace.fromJson(_wsData['info'], _wsData['invitations']);
+            setState(() {});
           }
+        }).whenComplete(() {
+          print('WHEN COMPLETE');
+          setState(() {});
         });
       }
     });
   }
+
+  updateWorkspace({
+    id,
+    name,
+    description,
+  }) {}
+
+  addInvitation({String email, int workspaceId}) {}
+
+  removeInvitation({int invitationId, int workspaceId}) {}
 
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       'workspace',
       key: _scaffKey,
-      body: Center(child: Text('workspace profile.'),),
+      body: _workspace != null
+          ? TabBarView(
+              children: <Widget>[
+                WorkspaceInfoView(_workspace, updateWorkspace),
+                WorkspaceInvitationsView(_workspace, 
+                  addCallback: addInvitation,
+                  removeCallback: removeInvitation
+                ),
+                Center(
+                  child: Text('workspace holidays.'),
+                ),
+              ],
+            )
+          : Center(
+              child: Text('No data.'),
+            ),
+      tabs: <Widget>[
+        Tab(
+          icon: Icon(Icons.info),
+        ),
+        Tab(
+          icon: Icon(Icons.people),
+        ),
+        Tab(
+          icon: Icon(Icons.date_range),
+        ),
+      ],
     );
   }
 }

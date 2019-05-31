@@ -2,7 +2,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:needoff/api/gql.dart' as gql;
 import 'package:needoff/models/workspace.dart';
 
-create(Workspace ws) async {
+Future create(Workspace ws) async {
   String membersStr = '[${ws.members.map((m) => '"$m"').toList().join(',')}]';
   QueryResult res = await gql.rawMutation('''
 mutation CreateWS {
@@ -20,7 +20,7 @@ mutation CreateWS {
   return res;
 }
 
-fetch() async {
+Future fetch() async {
   QueryResult res = await gql.rawQuery('''
 query MyWorkspaces {
   workspaces: myWorkspaces {
@@ -33,7 +33,7 @@ query MyWorkspaces {
   return res;
 }
 
-fetchWorkspace(int id) async {
+Future fetchWorkspace(int id) async {
   QueryResult res = await gql.rawQuery('''
 query LoadWorkspace {
   info: workspaceById(workspaceId: $id) {

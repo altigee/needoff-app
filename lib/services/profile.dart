@@ -5,6 +5,7 @@ Future fetchProfile() async {
   QueryResult res = await gql.rawQuery('''
 query MyProfile{
   profile{ 
+    userId,
     firstName,
     lastName,
     email,

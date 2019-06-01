@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:needoff/app_state.dart';
 import 'package:needoff/models/workspace.dart' show Workspace;
 import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/services/workspace.dart' as workspaceServ;
@@ -15,6 +16,7 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen> {
   GlobalKey _scaffKey = GlobalKey<ScaffoldState>();
   Map _wsData;
   Workspace _workspace;
+  bool _isOwner = false;
   @override
   void initState() {
     super.initState();
@@ -28,12 +30,12 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen> {
           } else {
             print(res.data);
             _wsData = res.data;
-            _workspace =
-                Workspace.fromJson(_wsData['info'], _wsData['invitations']);
+            _workspace = Workspace.fromJson(
+                _wsData['info'], _wsData['invitations'], _wsData['owner']);
+            _isOwner = _workspace.owner?.id == appState.profile.id;
             setState(() {});
           }
         }).whenComplete(() {
-          print('WHEN COMPLETE');
           setState(() {});
         });
       }
@@ -58,11 +60,12 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen> {
       body: _workspace != null
           ? TabBarView(
               children: <Widget>[
-                WorkspaceInfoView(_workspace, updateWorkspace),
-                WorkspaceInvitationsView(_workspace, 
-                  addCallback: addInvitation,
-                  removeCallback: removeInvitation
-                ),
+                WorkspaceInfoView(_workspace,
+                    handleUpdateCallback: _isOwner ? updateWorkspace : null,
+                    editable: _isOwner),
+                WorkspaceInvitationsView(_workspace,
+                    addCallback: addInvitation,
+                    removeCallback: removeInvitation),
                 Center(
                   child: Text('workspace holidays.'),
                 ),

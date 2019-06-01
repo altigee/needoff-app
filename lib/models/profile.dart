@@ -1,4 +1,5 @@
 class Profile {
+  int _id;
   String _firstName;
   String _lastName;
   String _email;
@@ -6,9 +7,14 @@ class Profile {
   String _position;
   DateTime _startDate;
 
-  Profile(data) {
+  Profile(Map data) {
     if (data != null) {
       if (data != null) {
+        if (data['id'] != null) {
+          _id = int.parse(data['id']);
+        } else if (data['userId'] != null) {
+          _id = int.parse(data['userId']);
+        }
         _firstName = data['firstName'];
         _lastName = data['lastName'];
         _email = data['email'];
@@ -21,6 +27,7 @@ class Profile {
     }
   }
 
+  get id => _id;
   get name => '$_firstName $_lastName';
   get email => _email;
   get phone => _phone;

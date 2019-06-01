@@ -36,6 +36,12 @@ query MyWorkspaces {
 Future fetchWorkspace(int id) async {
   QueryResult res = await gql.rawQuery('''
 query LoadWorkspace {
+  owner: workspaceOwner(workspaceId: $id) {
+    firstName,
+    lastName,
+    email,
+    userId,
+  }
   info: workspaceById(workspaceId: $id) {
     id,
     name,

@@ -1,14 +1,15 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:needoff/api/gql.dart' as gql;
 import 'package:needoff/models/leave.dart';
+import 'package:needoff/utils/dates.dart';
 
 create(int workspaceId, Leave leave) async {
   QueryResult res = await gql.rawMutation('''
 mutation CreateLeave {
   createDayOff(
     type: "${leave.type}",
-    startDate: "${leave.startDate}",
-    endDate: "${leave.endDate}",
+    startDate: "${formatForGQL(leave.startDate)}",
+    endDate: "${formatForGQL(leave.endDate)}",
     comment: "${leave.comment}",
     workspaceId: $workspaceId
     ) {

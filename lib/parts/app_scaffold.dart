@@ -8,13 +8,15 @@ class AppScaffold extends StatefulWidget {
   final Widget _floatingActionButton;
   final Key _key;
   final List<Widget> tabs;
+  final TabBar tabBar;
   AppScaffold(this._title,
-      {bool banner = true, Widget body, Widget floatingActionButton, Key key, List<Widget> tabs})
+      {bool banner = true, Widget body, Widget floatingActionButton, Key key, List<Widget> tabs, TabBar tabBar})
       : this._banner = banner,
         this._body = body,
         this._floatingActionButton = floatingActionButton,
         this._key = key,
-        this.tabs = tabs;
+        this.tabs = tabs,
+        this.tabBar = tabBar;
 
   @override
   _AppScaffoldState createState() => _AppScaffoldState();
@@ -46,15 +48,11 @@ class _AppScaffoldState extends State<AppScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    var tabs = widget.tabs ?? [];
     var scaffold = Scaffold(
         key: widget._key,
         appBar: AppBar(
           title: Text(widget._title, style: TextStyle(fontFamily: 'Orbitron')),
-          bottom: tabs.length > 0 ? TabBar(
-            tabs: tabs,
-            indicatorColor: Colors.white,
-          ) : null,
+          bottom: widget.tabBar
         ),
         body: Container(
           child: Stack(
@@ -67,10 +65,7 @@ class _AppScaffoldState extends State<AppScaffold> {
         ),
         floatingActionButton: widget._floatingActionButton);
     
-    return tabs.length > 0 ? DefaultTabController(
-      length: tabs.length,
-      child: scaffold,
-    ) : scaffold;
+    return scaffold;
   }
 }
 

@@ -4,7 +4,9 @@ import 'package:needoff/models/profile.dart' show Profile;
 
 typedef WorkspaceUpdateCallback({int id, String name, String description});
 typedef WorkspaceInvitationAddCallback({@required String email, @required int workspaceId});
-typedef WorkspaceInvitationRemoveCallback({@required int invitationId, @required int workspaceId});
+typedef WorkspaceInvitationRemoveCallback({@required String email, @required int workspaceId});
+typedef WorkspaceCalendarAddCallback({@required String name, @required int workspaceId});
+typedef WorkspaceCalendarRemoveCallback(int id);
 
 class Workspace {
   var _id;

@@ -1,6 +1,7 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:needoff/api/gql.dart' as gql;
 import 'package:needoff/models/workspace.dart';
+import 'package:needoff/utils/dates.dart';
 
 Future create(Workspace ws) async {
   String membersStr = '[${ws.members.map((m) => '"$m"').toList().join(',')}]';
@@ -54,6 +55,54 @@ query LoadWorkspace {
   }
   calendars: workspaceCalendars(workspaceId: $id) {
     name
+  }
+}
+  ''');
+
+  return res;
+}
+
+Future addMember(String email, DateTime startDate, int workspaceId) async {
+  QueryResult res = await gql.rawMutation('''
+mutation AddMember {
+  addWorkspaceMember(email: "$email", startDate: "${formatForGQL(startDate)}", wsId: $workspaceId){
+    ok
+  }
+}
+  ''');
+
+  return res;
+}
+
+Future removeMember(String email, int workspaceId) async {
+  QueryResult res = await gql.rawMutation('''
+mutation RemoveMember {
+  removeWorkspaceMember(email: "$email", wsId: $workspaceId){
+    ok
+  }
+}
+  ''');
+
+  return res;
+}
+
+Future createCalendar(String name, int workspaceId) async {
+  QueryResult res = await gql.rawMutation('''
+mutation CreateCalendar {
+  createWorkspaceCalendar(name: "$name", wsId: $workspaceId) {
+    ok
+  }
+}
+  ''');
+
+  return res;
+}
+
+Future removeCalendar(int calendarId) async {
+  QueryResult res = gql.rawMutation('''
+mutation RemoveCalendar {
+  removeWorkspaceCalendar(id: $calendarId) {
+    ok
   }
 }
   ''');

@@ -5,7 +5,12 @@ import 'package:needoff/models/workspace.dart'
         WorkspaceInvitation,
         WorkspaceUpdateCallback,
         WorkspaceInvitationAddCallback,
-        WorkspaceInvitationRemoveCallback;
+        WorkspaceInvitationRemoveCallback,
+        WorkspaceCalendarAddCallback,
+        WorkspaceCalendarRemoveCallback;
+import 'package:needoff/utils/dates.dart';
+import 'package:needoff/utils/ui.dart';
+import 'package:needoff/utils/validation.dart';
 
 class WorkspaceInfoView extends StatefulWidget {
   final Workspace workspace;
@@ -131,10 +136,8 @@ class InfoRow extends StatelessWidget {
 
 class WorkspaceInvitationsView extends StatefulWidget {
   final Workspace workspace;
-  final WorkspaceInvitationAddCallback addCallback;
   final WorkspaceInvitationRemoveCallback removeCallback;
-  WorkspaceInvitationsView(this.workspace,
-      {this.addCallback, this.removeCallback});
+  WorkspaceInvitationsView(this.workspace, {this.removeCallback});
   // : this.addCallback = addCallback,
   // this.removeCallback = removeCallback;
   @override
@@ -149,6 +152,16 @@ class _WorkspaceInvitationsViewState extends State<WorkspaceInvitationsView> {
       return ListTile(
         title: Text(invite.email),
         subtitle: Text(invite.status),
+        trailing: IconButton(
+          icon: Icon(Icons.delete),
+          onPressed: () async {
+            var res = await openConfirmation(context, title: 'Are you sure?');
+            if (res['ok'] && widget.removeCallback is Function) {
+              widget.removeCallback(
+                  email: invite.email, workspaceId: widget.workspace.id);
+            }
+          },
+        ),
       );
     }).toList();
   }
@@ -161,4 +174,79 @@ class _WorkspaceInvitationsViewState extends State<WorkspaceInvitationsView> {
       ),
     );
   }
+}
+
+class WorkspaceCalendarsListView extends StatefulWidget {
+  final Workspace workspace;
+  final WorkspaceCalendarAddCallback addCallback;
+  final WorkspaceCalendarRemoveCallback removeCallback;
+  WorkspaceCalendarsListView(this.workspace,
+      {this.addCallback, this.removeCallback});
+  @override
+  _WorkspaceCalendarsListViewState createState() =>
+      _WorkspaceCalendarsListViewState();
+}
+
+class _WorkspaceCalendarsListViewState
+    extends State<WorkspaceCalendarsListView> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+Future openAddMemberDialog(BuildContext context) {
+  var formKey = GlobalKey<FormState>();
+  TextEditingController _startInpCtrl =
+      TextEditingController(text: formatDate(DateTime.now()));
+  TextEditingController _emailInpCtrl = TextEditingController();
+  FocusNode fn = FocusNode();
+  Widget form = Form(
+    key: formKey,
+    child: Column(
+      children: <Widget>[
+        TextFormField(
+          controller: _emailInpCtrl,
+          validator: (value) {
+            if (value.isEmpty || !isValidEmail(value)) {
+              return 'Please enter a valid email';
+            }
+          },
+          decoration: InputDecoration(
+            labelText: 'Email:',
+          ),
+        ),
+        TextField(
+          onTap: () async {
+            fn.unfocus();
+            var res = await openDatePicker(context);
+            if (res != null) {
+              _startInpCtrl.text = formatDate(res);
+            }
+          },
+          controller: _startInpCtrl,
+          focusNode: fn,
+          enableInteractiveSelection: false,
+          decoration: InputDecoration(labelText: 'First day:'),
+        ),
+      ],
+    ),
+  );
+
+  return openEditFormDialog(
+    context,
+    form: form,
+    dialogTitle: 'Invite a person',
+    onCancel: () {
+      Navigator.pop(context);
+    },
+    onOk: () {
+      if ((form.key as GlobalKey<FormState>).currentState.validate()) {
+        Navigator.pop(context, {
+          'email': _emailInpCtrl.text,
+          'startDate': parseFormatted(_startInpCtrl.text),
+        });
+      }
+    },
+  );
 }

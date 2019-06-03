@@ -5,6 +5,7 @@ import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/app_state.dart' show appState, AppStateException;
 import 'package:needoff/utils/ui.dart';
 import 'package:needoff/parts/widget_mixins.dart' show LoadingState;
+import 'package:needoff/utils/validation.dart';
 
 class WorkspaceCreateScreen extends StatefulWidget {
   @override
@@ -142,8 +143,7 @@ class _WorkspaceCreateScreenState extends State<WorkspaceCreateScreen> with Load
                               keyboardType: TextInputType.emailAddress,
                               controller: _memberInpCtrl,
                               validator: (value) {
-                                bool emailValid = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value);
-                                if (emailValid == false) {
+                                if (!isValidEmail(value)) {
                                   return 'Enter valid email';
                                 }
                               },

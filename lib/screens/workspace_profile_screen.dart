@@ -80,22 +80,26 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
     Widget fab;
     switch (_tabCtrl.index) {
       case 1:
-        fab = FloatingActionButton(
-          backgroundColor: Theme.of(context).accentColor,
-          onPressed: () {
-            _handleAddMember(context);
-          },
-          child: Icon(Icons.add),
-        );
+        if (_isOwner) {
+          fab = FloatingActionButton(
+            backgroundColor: Theme.of(context).accentColor,
+            onPressed: () {
+              _handleAddMember(context);
+            },
+            child: Icon(Icons.add),
+          );
+        }
         break;
       case 2:
-        fab = FloatingActionButton(
-          backgroundColor: Theme.of(context).accentColor,
-          onPressed: () {
-            _handleAddCalendar(context);
-          },
-          child: Icon(Icons.add),
-        );
+        if (_isOwner) {
+          fab = FloatingActionButton(
+            backgroundColor: Theme.of(context).accentColor,
+            onPressed: () {
+              _handleAddCalendar(context);
+            },
+            child: Icon(Icons.add),
+          );
+        }
         break;
       default:
     }
@@ -152,7 +156,8 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
                     handleUpdateCallback: _isOwner ? updateWorkspace : null,
                     editable: _isOwner),
                 WorkspaceInvitationsView(_workspace,
-                    removeCallback: removeInvitation),
+                    removeCallback: _isOwner ? removeInvitation : null,
+                    editable: _isOwner),
                 Center(
                   child: Text('workspace holidays.'),
                 ),

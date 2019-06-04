@@ -4,7 +4,6 @@ import 'package:needoff/models/workspace.dart'
         Workspace,
         WorkspaceInvitation,
         WorkspaceUpdateCallback,
-        WorkspaceInvitationAddCallback,
         WorkspaceInvitationRemoveCallback,
         WorkspaceCalendarAddCallback,
         WorkspaceCalendarRemoveCallback;
@@ -17,7 +16,7 @@ class WorkspaceInfoView extends StatefulWidget {
   final WorkspaceUpdateCallback handleUpdateCallback;
   final editable;
   WorkspaceInfoView(this.workspace,
-      {this.handleUpdateCallback, this.editable: false});
+      {this.handleUpdateCallback, this.editable = false});
   @override
   _WorkspaceInfoViewState createState() => _WorkspaceInfoViewState();
 }
@@ -49,56 +48,59 @@ class _WorkspaceInfoViewState extends State<WorkspaceInfoView> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(32),
-      child: Column(
-        children: <Widget>[
-          if (widget.editable)
-            Form(
-              key: _formKey,
-              autovalidate: true,
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
-                    controller: _nameCtrl,
-                    validator: (value) {
-                      if (value.isEmpty) {
-                        return 'Enter the name of the workspace.';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'Name',
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            if (widget.editable)
+              Form(
+                key: _formKey,
+                autovalidate: true,
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      controller: _nameCtrl,
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Enter the name of the workspace.';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Name',
+                      ),
                     ),
-                  ),
-                  TextFormField(
-                    controller: _descrCtrl,
-                    maxLines: 2,
-                    validator: (value) {
-                      if (value.isEmpty) {
-                        return 'Enter short description of the workspace.';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'Description',
+                    TextFormField(
+                      controller: _descrCtrl,
+                      maxLines: 2,
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Enter short description of the workspace.';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+            if (!widget.editable) ...[
+              InfoRow(title: 'Name', value: widget.workspace?.name),
+              InfoRow(
+                  title: 'Description', value: widget.workspace?.description),
+            ],
+            SizedBox(
+              height: 32,
             ),
-          if (!widget.editable) ...[
-            InfoRow(title: 'Name', value: widget.workspace?.name),
-            InfoRow(title: 'Description', value: widget.workspace?.description),
+            InfoRow(title: 'Owner', value: widget.workspace?.owner?.name),
+            if (widget.editable)
+              RaisedButton(
+                child: Text('Update'),
+                onPressed: _handleUpdate,
+              )
           ],
-          SizedBox(
-            height: 32,
-          ),
-          InfoRow(title: 'Owner', value: widget.workspace?.owner?.name),
-          if (widget.editable)
-            RaisedButton(
-              child: Text('Update'),
-              onPressed: _handleUpdate,
-            )
-        ],
+        ),
       ),
     );
   }
@@ -136,8 +138,10 @@ class InfoRow extends StatelessWidget {
 
 class WorkspaceInvitationsView extends StatefulWidget {
   final Workspace workspace;
+  final bool editable;
   final WorkspaceInvitationRemoveCallback removeCallback;
-  WorkspaceInvitationsView(this.workspace, {this.removeCallback});
+  WorkspaceInvitationsView(this.workspace,
+      {this.removeCallback, this.editable = false});
   // : this.addCallback = addCallback,
   // this.removeCallback = removeCallback;
   @override
@@ -152,16 +156,21 @@ class _WorkspaceInvitationsViewState extends State<WorkspaceInvitationsView> {
       return ListTile(
         title: Text(invite.email),
         subtitle: Text(invite.status),
-        trailing: IconButton(
-          icon: Icon(Icons.delete),
-          onPressed: () async {
-            var res = await openConfirmation(context, title: 'Are you sure?');
-            if (res['ok'] && widget.removeCallback is Function) {
-              widget.removeCallback(
-                  email: invite.email, workspaceId: widget.workspace.id);
-            }
-          },
-        ),
+        trailing: widget.editable
+            ? IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () async {
+                  var res = await openConfirmation(context,
+                      title: 'Are you sure?', okLabel: 'remove');
+                  if (res != null &&
+                      res['ok'] &&
+                      widget.removeCallback is Function) {
+                    widget.removeCallback(
+                        email: invite.email, workspaceId: widget.workspace.id);
+                  }
+                },
+              )
+            : null,
       );
     }).toList();
   }
@@ -219,7 +228,8 @@ Future openAddMemberDialog(BuildContext context) {
         TextField(
           onTap: () async {
             fn.unfocus();
-            var res = await openDatePicker(context);
+            var res = await openDatePicker(context,
+                firstDate: DateTime.now().subtract(Duration(days: 365)));
             if (res != null) {
               _startInpCtrl.text = formatDate(res);
             }

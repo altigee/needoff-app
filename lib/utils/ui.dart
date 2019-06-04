@@ -9,7 +9,7 @@ void snack(source, String text) {
     ..showSnackBar(SnackBar(content: Text(text)));
 }
 
-Future openConfirmation(BuildContext ctx, {String title}) {
+Future openConfirmation(BuildContext ctx, {String title, String okLabel = 'ok', String cancelLable = 'cancel'}) {
   return showDialog(
       context: ctx,
       builder: (BuildContext context) {
@@ -18,13 +18,14 @@ Future openConfirmation(BuildContext ctx, {String title}) {
           actions: <Widget>[
             FlatButton(
               child: Text(
-                'cancel',
+                cancelLable,
                 style: TextStyle(inherit: true, color: Theme.of(context).primaryColor),
               ),
               onPressed: () => Navigator.pop(context),
             ),
             FlatButton(
-              child: Text('ok',
+              child: Text(
+                okLabel,
                 style: TextStyle(inherit: true, color: Theme.of(context).accentColor),
               ),
               onPressed: () => Navigator.pop(context, {'ok': true}),

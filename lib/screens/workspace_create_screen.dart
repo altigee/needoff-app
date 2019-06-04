@@ -12,7 +12,8 @@ class WorkspaceCreateScreen extends StatefulWidget {
   _WorkspaceCreateScreenState createState() => _WorkspaceCreateScreenState();
 }
 
-class _WorkspaceCreateScreenState extends State<WorkspaceCreateScreen> with LoadingState {
+class _WorkspaceCreateScreenState extends State<WorkspaceCreateScreen>
+    with LoadingState {
   var id;
   List members = [];
 
@@ -24,7 +25,7 @@ class _WorkspaceCreateScreenState extends State<WorkspaceCreateScreen> with Load
   TextEditingController _memberInpCtrl = TextEditingController();
 
   _handleAddMember() {
-    if(_memberFormKey.currentState.validate()) {
+    if (_memberFormKey.currentState.validate()) {
       setState(() {
         members.insert(0, _memberInpCtrl.text);
         _memberInpCtrl.text = '';
@@ -67,13 +68,10 @@ class _WorkspaceCreateScreenState extends State<WorkspaceCreateScreen> with Load
     if (_formKey.currentState.validate()) {
       loading = true;
       try {
-        await appState.addWorkspace(Workspace(
-          _nameInpCtrl.text,
-          description: _descInpCtrl.text,
-          members: members
-        ));
+        await appState.addWorkspace(Workspace(_nameInpCtrl.text,
+            description: _descInpCtrl.text, members: members));
         Navigator.of(context).pop();
-      } on AppStateException catch(e) {
+      } on AppStateException catch (e) {
         snack(_formKey.currentContext, e.message);
       } catch (e) {
         snack(_formKey.currentContext, 'Something went wrong :(');
@@ -160,17 +158,20 @@ class _WorkspaceCreateScreenState extends State<WorkspaceCreateScreen> with Load
                     ),
                     Container(
                       height: 280,
-                      padding: EdgeInsets.only(top:16, bottom: 16),
+                      padding: EdgeInsets.only(top: 16, bottom: 16),
                       child: _buildMembersList(),
                     ),
                   ],
                 ),
               ),
-              RaisedButton(
-                color: Theme.of(context).primaryColor,
-                textColor: Colors.white,
-                onPressed: loading ? null : _handleCreateWorkspace,
-                child: Text('Create Workspace'),
+              SizedBox(
+                width: double.infinity,
+                child: RaisedButton(
+                  color: Theme.of(context).primaryColor,
+                  textColor: Colors.white,
+                  onPressed: loading ? null : _handleCreateWorkspace,
+                  child: Text('Create Workspace'),
+                ),
               ),
             ],
           ),

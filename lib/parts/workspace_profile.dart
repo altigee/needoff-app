@@ -128,6 +128,9 @@ class _WorkspaceInvitationsViewState extends State<WorkspaceInvitationsView> {
       return ListTile(
         title: Text(invite.email),
         subtitle: Text(invite.status),
+        onTap: () {
+          print('tap tap tap');
+        },
         trailing: widget.editable
             ? IconButton(
                 icon: Icon(Icons.delete),
@@ -187,6 +190,7 @@ Future openAddMemberDialog(BuildContext context) {
     child: Column(
       children: <Widget>[
         TextFormField(
+          keyboardType: TextInputType.emailAddress,
           controller: _emailInpCtrl,
           validator: (value) {
             if (value.isEmpty || !isValidEmail(value)) {

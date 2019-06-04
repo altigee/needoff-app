@@ -39,8 +39,6 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> with LoadingState {
           setState(() {
             _activeWSId = id;
           });
-          Navigator.of(context)
-              .pushNamed('/workspace-profile', arguments: {'id': id});
         }
       } catch (e) {
         print('![ERROR] Can not set active workspace');
@@ -56,14 +54,20 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> with LoadingState {
       } catch (e) {}
       return ListTile(
         onTap: () {
-          _setCurrentWorkspace(item);
+          Navigator.of(context)
+              .pushNamed('/workspace-profile', arguments: {'id': item.id});
         },
         contentPadding: EdgeInsets.fromLTRB(16, 4, 16, 4),
         title: Text(item.name),
         subtitle: Text(item.description ?? ''),
-        trailing: Icon(current
-            ? Icons.radio_button_checked
-            : Icons.radio_button_unchecked),
+        trailing: IconButton(
+          onPressed: () {
+            _setCurrentWorkspace(item);
+          },
+          icon: Icon(current
+              ? Icons.radio_button_checked
+              : Icons.radio_button_unchecked),
+        ),
       );
     }).toList();
   }

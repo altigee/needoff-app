@@ -58,6 +58,7 @@ class _LoginScreenState extends State<LoginScreen> with LoadingState {
                           children: <Widget>[
                             TextFormField(
                               // autofocus: true,
+                              keyboardType: TextInputType.emailAddress,
                               decoration: InputDecoration(labelText: 'Email'),
                               controller: _emailCtrl,
                               validator: (value) {

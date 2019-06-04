@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:needoff/app_state.dart' show appState, AppStateException;
 import 'package:needoff/models/credentials.dart';
 import 'package:needoff/parts/app_scaffold.dart';
+import 'package:needoff/parts/widget_mixins.dart';
 import 'package:needoff/utils/ui.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -10,32 +11,40 @@ class RegistrationScreen extends StatefulWidget {
   _RegistrationScreenState createState() => _RegistrationScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationScreenState extends State<RegistrationScreen>
+    with LoadingState {
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
+
+  bool _autovalidate = false;
 
   TextEditingController _emailCtrl = TextEditingController();
+  TextEditingController _firstNameCtrl = TextEditingController();
+  TextEditingController _lastNameCtrl = TextEditingController();
   TextEditingController _pwdCtrl = TextEditingController();
   TextEditingController _pwd2Ctrl = TextEditingController();
 
-  void _loading(bool val) {
-    setState(() {
-      _isLoading = val;
-    });
-  }
-
   Future _handleCreateAccount() async {
     if (_formKey.currentState.validate()) {
-      _loading(true);
+      setState(() {
+        loading = true;
+      });
       try {
-        await appState.signup(Credentials(_emailCtrl.text, _pwdCtrl.text));
+        await appState.signup(Credentials(_emailCtrl.text, _pwdCtrl.text),
+            userData: {
+              'firstName': _firstNameCtrl.text,
+              'lastName': _lastNameCtrl.text
+            });
         Navigator.of(context).pop();
-      } on AppStateException catch(e) {
+      } on AppStateException catch (e) {
         snack(_formKey.currentContext, e.message);
       } catch (e) {
         snack(_formKey.currentContext, 'Something went wrong :(');
       }
-      _loading(false);
+      setState(() {
+        loading = false;
+      });
+    } else {
+      _autovalidate = true;
     }
   }
 
@@ -55,6 +64,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: Form(
+                        autovalidate: _autovalidate,
                         key: _formKey,
                         child: Column(
                           children: <Widget>[
@@ -65,6 +75,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               validator: (value) {
                                 if (value.isEmpty) {
                                   return "Please enter your email.";
+                                }
+                              },
+                            ),
+                            TextFormField(
+                              // autofocus: true,
+                              decoration:
+                                  InputDecoration(labelText: 'First Name'),
+                              controller: _firstNameCtrl,
+                              validator: (value) {
+                                if (value.isEmpty) {
+                                  return "Please enter your first name.";
+                                }
+                              },
+                            ),
+                            TextFormField(
+                              // autofocus: true,
+                              decoration:
+                                  InputDecoration(labelText: 'Last Name'),
+                              controller: _lastNameCtrl,
+                              validator: (value) {
+                                if (value.isEmpty) {
+                                  return "Please enter your last name.";
                                 }
                               },
                             ),
@@ -93,14 +125,19 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 }
                               },
                             ),
+                            SizedBox(height: 48,),
+                            SizedBox(
+                              width: double.infinity,
+                              child: RaisedButton(
+                                color: Theme.of(context).primaryColor,
+                                textColor: Colors.white,
+                                onPressed:
+                                    loading ? null : _handleCreateAccount,
+                                child: Text('Create Account'),
+                              ),
+                            ),
                           ],
                         )),
-                  ),
-                  RaisedButton(
-                    color: Theme.of(context).primaryColor,
-                    textColor: Colors.white,
-                    onPressed: _isLoading ? null : _handleCreateAccount,
-                    child: Text('Create Account'),
                   ),
                 ],
               ),

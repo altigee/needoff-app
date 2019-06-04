@@ -29,6 +29,8 @@ class Profile {
 
   get id => _id;
   get name => '$_firstName $_lastName';
+  get firstName => _firstName;
+  get lastName => _lastName;
   get email => _email;
   get phone => _phone;
   get position => _position;

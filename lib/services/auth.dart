@@ -3,10 +3,11 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:needoff/api/gql.dart' as gql;
 import 'package:needoff/models/credentials.dart';
 
-Future<QueryResult> signUp(Credentials creds) async {
+Future<QueryResult> signUp(Credentials creds, {Map userData}) async {
+  var ud = '{firstName: "${userData['firstName']}", lastName: "${userData['lastName']}"}';
   QueryResult res = await gql.rawMutation('''
 mutation CreateAccount {
-  register(email: "${creds.email}", password: "${creds.password}") {
+  register(email: "${creds.email}", password: "${creds.password}", userData: $ud) {
     ok,
     userId,
     accessToken,

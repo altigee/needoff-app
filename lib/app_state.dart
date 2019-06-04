@@ -78,8 +78,8 @@ class AppState {
     return fetchProfile().then((res) => fetchWorkspaces());
   }
 
-  Future signup(Credentials creds) async {
-    QueryResult res = await authServ.signUp(creds);
+  Future signup(Credentials creds, {Map userData}) async {
+    QueryResult res = await authServ.signUp(creds, userData: userData);
     if (!res.hasErrors &&
         res.data != null &&
         res.data['register']['accessToken'] != null) {

@@ -15,8 +15,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> with LoadingState {
   final _formKey = GlobalKey<FormState>();
 
-  TextEditingController _emailCtrl =
-      TextEditingController(text: '@alt.com');
+  TextEditingController _emailCtrl = TextEditingController(text: '@alt.com');
   TextEditingController _pwdCtrl = TextEditingController(text: 'ssssss');
 
   Future _handleLogin() async {
@@ -78,14 +77,20 @@ class _LoginScreenState extends State<LoginScreen> with LoadingState {
                                 }
                               },
                             ),
+                            SizedBox(
+                              height: 48,
+                            ),
+                            SizedBox(
+                              width: double.infinity,
+                              child: RaisedButton(
+                                color: Theme.of(context).primaryColor,
+                                textColor: Colors.white,
+                                onPressed: loading ? null : _handleLogin,
+                                child: Text('Login'),
+                              ),
+                            ),
                           ],
                         )),
-                  ),
-                  RaisedButton(
-                    color: Theme.of(context).primaryColor,
-                    textColor: Colors.white,
-                    onPressed: loading ? null : _handleLogin,
-                    child: Text('Login'),
                   ),
                   Padding(
                     padding: EdgeInsets.fromLTRB(0, 30, 0, 0),

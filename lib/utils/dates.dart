@@ -2,6 +2,9 @@ import 'package:intl/intl.dart' as intl;
 
 intl.DateFormat _df = intl.DateFormat.yMMMd();
 formatDate(DateTime date) {
+  if (date == null) {
+    return null;
+  }
   return _df.format(date);
 }
 

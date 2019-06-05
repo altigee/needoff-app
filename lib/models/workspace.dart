@@ -14,24 +14,30 @@ class Workspace {
   String _description;
   List _members;
   List<WorkspaceInvitation> _invitations;
+  List<Calendar> _calendars;
   Profile _owner;
   Workspace(this._name,
       {String description: '',
       int id,
       List members,
       List<WorkspaceInvitation> invitations,
+      List<Calendar> calendars,
       Profile owner})
       : this._description = description,
         this._id = id,
         this._members = members,
         this._invitations = invitations,
+        this._calendars = calendars,
         this._owner = owner;
-  Workspace.fromJson(Map data, List invitations, Map ownerData)
+  Workspace.fromJson(Map data, {List invitations, Map ownerData, List calendars})
       : this._description = data['description'],
         this._id = int.parse(data['id']),
         this._name = data['name'],
         this._invitations = invitations.map((item) {
           return WorkspaceInvitation.fromJson(item);
+        }).toList(),
+        this._calendars = calendars.map((item) {
+          return Calendar.fromJson(item);
         }).toList(),
         this._owner = Profile(ownerData);
 
@@ -44,6 +50,7 @@ class Workspace {
   String get description => _description;
   List get members => _members ?? [];
   List<WorkspaceInvitation> get invitations => _invitations ?? [];
+  List<Calendar> get calendars => _calendars ?? [];
   Profile get owner => _owner;
 }
 
@@ -65,4 +72,15 @@ class WorkspaceInvitationStatus {
   static const PENDING = 'PENDING';
   static const ACCEPTED = 'ACCEPTED';
   static const REVOKED = 'REVOKED';
+}
+
+class Calendar {
+  int _id;
+  String _name;
+  Calendar(this._id, this._name);
+  Calendar.fromJson(Map data)
+    : _id = int.parse(data['id']),
+      _name = data['name'];
+  int get id => _id;
+  String get name => _name;
 }

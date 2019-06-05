@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:needoff/app_state.dart';
 import 'package:needoff/models/workspace.dart' show Workspace;
 import 'package:needoff/parts/app_scaffold.dart';
+import 'package:needoff/parts/workspace_profile.dart';
 import 'package:needoff/services/workspace.dart' as workspaceServ;
 import 'package:needoff/utils/ui.dart';
 import 'package:needoff/parts/workspace_profile.dart'
-    show WorkspaceInfoView, WorkspaceInvitationsView, openAddMemberDialog;
+    show WorkspaceInfoView, WorkspaceInvitationsView, openAddMemberDialog, openAddCalendarDialog;
 
 class WorkspaceProfileScreen extends StatefulWidget {
   @override
@@ -50,8 +51,10 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
       } else {
         print(res.data);
         _wsData = res.data;
-        _workspace = Workspace.fromJson(
-            _wsData['info'], _wsData['invitations'], _wsData['owner']);
+        _workspace = Workspace.fromJson(_wsData['info'],
+            invitations: _wsData['invitations'],
+            calendars: _wsData['calendars'],
+            ownerData: _wsData['owner']);
         _isOwner = _workspace.owner?.id == appState.profile.id;
         setState(() {});
       }
@@ -69,6 +72,18 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
       var res = await workspaceServ.removeMember(email, workspaceId);
       if (res.hasErrors) {
         snack(_scaffKey.currentState, 'Failed to remove invitation.');
+      }
+      await loadWorkspace();
+    } catch (e) {
+      snack(_scaffKey.currentState, 'Something went wrong :(');
+    }
+  }
+
+  removeCalendar(int calendarId) async {
+    try {
+      var res = await workspaceServ.removeCalendar(calendarId);
+      if (res.hasErrors) {
+        snack(_scaffKey.currentState, 'Failed to remove calendar.');
       }
       await loadWorkspace();
     } catch (e) {
@@ -123,8 +138,20 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
     }
   }
 
-  _handleAddCalendar(BuildContext ctx) {
-    print('OPEN ADD CALENDAR DIALOG');
+  _handleAddCalendar(BuildContext ctx) async {
+    Map calendarData = await openAddCalendarDialog(ctx);
+    if (calendarData != null) {
+      try {
+        var res = await workspaceServ.createCalendar(
+            calendarData['name'], _workspace.id);
+        if (res.hasErrors || res.data == null) {
+          snack(_scaffKey.currentState, 'Failed to create calendar.');
+        }
+        await loadWorkspace();
+      } catch (e) {
+        snack(_scaffKey.currentState, 'Something went wrong :(');
+      }
+    }
   }
 
   @override
@@ -158,9 +185,9 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
                 WorkspaceInvitationsView(_workspace,
                     removeCallback: _isOwner ? removeInvitation : null,
                     editable: _isOwner),
-                Center(
-                  child: Text('workspace holidays.'),
-                ),
+                WorkspaceCalendarsListView(_workspace,
+                    removeCallback: _isOwner ? removeCalendar : null,
+                    editable: _isOwner),
               ],
             )
           : Center(

@@ -54,7 +54,9 @@ query LoadWorkspace {
     status
   }
   calendars: workspaceCalendars(workspaceId: $id) {
-    name
+    id,
+    name,
+    wsId
   }
 }
   ''');
@@ -99,7 +101,7 @@ mutation CreateCalendar {
 }
 
 Future removeCalendar(int calendarId) async {
-  QueryResult res = gql.rawMutation('''
+  QueryResult res = await gql.rawMutation('''
 mutation RemoveCalendar {
   removeWorkspaceCalendar(id: $calendarId) {
     ok

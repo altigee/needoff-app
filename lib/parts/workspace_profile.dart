@@ -5,7 +5,7 @@ import 'package:needoff/models/workspace.dart'
         WorkspaceInvitation,
         WorkspaceUpdateCallback,
         WorkspaceInvitationRemoveCallback,
-        WorkspaceCalendarAddCallback,
+        Calendar,
         WorkspaceCalendarRemoveCallback;
 import 'package:needoff/parts/info_row.dart';
 import 'package:needoff/utils/dates.dart';
@@ -107,23 +107,20 @@ class _WorkspaceInfoViewState extends State<WorkspaceInfoView> {
   }
 }
 
-
 class WorkspaceInvitationsView extends StatefulWidget {
   final Workspace workspace;
   final bool editable;
   final WorkspaceInvitationRemoveCallback removeCallback;
   WorkspaceInvitationsView(this.workspace,
       {this.removeCallback, this.editable = false});
-  // : this.addCallback = addCallback,
-  // this.removeCallback = removeCallback;
+
   @override
   _WorkspaceInvitationsViewState createState() =>
       _WorkspaceInvitationsViewState();
 }
 
 class _WorkspaceInvitationsViewState extends State<WorkspaceInvitationsView> {
-  List<Widget> _buildList() {
-    List<WorkspaceInvitation> data = widget.workspace?.invitations ?? [];
+  List<Widget> _buildList(List data) {
     return data.map((invite) {
       return ListTile(
         title: Text(invite.email),
@@ -152,20 +149,25 @@ class _WorkspaceInvitationsViewState extends State<WorkspaceInvitationsView> {
 
   @override
   Widget build(BuildContext context) {
+    List<WorkspaceInvitation> data = widget.workspace?.invitations ?? [];
     return Container(
-      child: ListView(
-        children: _buildList(),
-      ),
+      child: data.length == 0
+          ? Center(
+              child: Text('No invitations found.'),
+            )
+          : ListView(
+              children: _buildList(data),
+            ),
     );
   }
 }
 
 class WorkspaceCalendarsListView extends StatefulWidget {
   final Workspace workspace;
-  final WorkspaceCalendarAddCallback addCallback;
+  final bool editable;
   final WorkspaceCalendarRemoveCallback removeCallback;
   WorkspaceCalendarsListView(this.workspace,
-      {this.addCallback, this.removeCallback});
+      {this.editable = false, this.removeCallback});
   @override
   _WorkspaceCalendarsListViewState createState() =>
       _WorkspaceCalendarsListViewState();
@@ -173,9 +175,44 @@ class WorkspaceCalendarsListView extends StatefulWidget {
 
 class _WorkspaceCalendarsListViewState
     extends State<WorkspaceCalendarsListView> {
+  List<Widget> _buildList(List data) {
+    return data.map((cal) {
+      return ListTile(
+        title: Text(cal.name),
+        onTap: () {
+          print('tap tap tap');
+        },
+        trailing: widget.editable
+            ? IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () async {
+                  var res = await openConfirmation(context,
+                      title: 'Are you sure?', okLabel: 'remove');
+                  if (res != null &&
+                      res['ok'] &&
+                      widget.removeCallback is Function) {
+                    widget.removeCallback(cal.id);
+                  }
+                },
+              )
+            : null,
+      );
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container();
+    List<Calendar> data = widget.workspace?.calendars ?? [];
+    return Container(
+      child: data.length == 0
+          ? Center(
+              child: Text('No calendars found.'),
+            )
+          : ListView(
+              children: _buildList(data),
+            ),
+    );
+    ;
   }
 }
 
@@ -232,6 +269,46 @@ Future openAddMemberDialog(BuildContext context) {
           'email': _emailInpCtrl.text,
           'startDate': parseFormatted(_startInpCtrl.text),
         });
+      }
+    },
+  );
+}
+
+Future openAddCalendarDialog(BuildContext context) {
+  var formKey = GlobalKey<FormState>();
+  TextEditingController _nameInpCtrl = TextEditingController();
+  Widget form = Form(
+    key: formKey,
+    child: Column(
+      children: <Widget>[
+        TextFormField(
+          autofocus: true,
+          keyboardType: TextInputType.emailAddress,
+          controller: _nameInpCtrl,
+          validator: (value) {
+            if (value.isEmpty) {
+              return 'Please enter a name';
+            }
+          },
+          decoration: InputDecoration(
+            labelText: 'Calendar name:',
+            hintText: 'e.g Ukrainian holidays',
+          ),
+        ),
+      ],
+    ),
+  );
+
+  return openEditFormDialog(
+    context,
+    form: form,
+    dialogTitle: 'New Calendar',
+    onCancel: () {
+      Navigator.pop(context);
+    },
+    onOk: () {
+      if ((form.key as GlobalKey<FormState>).currentState.validate()) {
+        Navigator.pop(context, {'name': _nameInpCtrl.text});
       }
     },
   );

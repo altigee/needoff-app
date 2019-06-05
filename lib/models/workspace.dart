@@ -3,9 +3,12 @@ import 'package:meta/meta.dart';
 import 'package:needoff/models/profile.dart' show Profile;
 
 typedef WorkspaceUpdateCallback({int id, String name, String description});
-typedef WorkspaceInvitationAddCallback({@required String email, @required int workspaceId});
-typedef WorkspaceInvitationRemoveCallback({@required String email, @required int workspaceId});
-typedef WorkspaceCalendarAddCallback({@required String name, @required int workspaceId});
+typedef WorkspaceInvitationAddCallback(
+    {@required String email, @required int workspaceId});
+typedef WorkspaceInvitationRemoveCallback(
+    {@required String email, @required int workspaceId});
+typedef WorkspaceCalendarAddCallback(
+    {@required String name, @required int workspaceId});
 typedef WorkspaceCalendarRemoveCallback(int id);
 
 class Workspace {
@@ -29,7 +32,8 @@ class Workspace {
         this._invitations = invitations,
         this._calendars = calendars,
         this._owner = owner;
-  Workspace.fromJson(Map data, {List invitations, Map ownerData, List calendars})
+  Workspace.fromJson(Map data,
+      {List invitations, Map ownerData, List calendars})
       : this._description = data['description'],
         this._id = int.parse(data['id']),
         this._name = data['name'],
@@ -77,10 +81,32 @@ class WorkspaceInvitationStatus {
 class Calendar {
   int _id;
   String _name;
+  int _workspaceId;
   Calendar(this._id, this._name);
   Calendar.fromJson(Map data)
-    : _id = int.parse(data['id']),
-      _name = data['name'];
+      : _id = int.parse(data['id']),
+        _name = data['name'],
+        _workspaceId = data['wsId'] ?? data['workspaceId'];
   int get id => _id;
   String get name => _name;
+  int get workspaceId => _workspaceId;
+}
+
+class Holiday {
+  int _id;
+  String _name;
+  int _calendarId;
+  DateTime _date;
+
+  Holiday(this._id, this._name, this._calendarId, this._date);
+  Holiday.fromJson(Map data)
+    : _id = int.parse(data['id']),
+      _name = data['name'],
+      _calendarId = int.parse(data['calendarId']),
+      _date = DateTime.parse(data['date']);
+
+  int get id => id;
+  int get calendarId => _calendarId;
+  String get name => _name;
+  DateTime get date => _date;
 }

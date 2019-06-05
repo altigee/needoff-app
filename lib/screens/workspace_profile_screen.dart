@@ -17,7 +17,6 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
     with SingleTickerProviderStateMixin {
   GlobalKey _scaffKey = GlobalKey<ScaffoldState>();
   TabController _tabCtrl;
-  Map _wsData;
   int _wsId;
   Workspace _workspace;
   bool _isOwner = false;
@@ -50,11 +49,11 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
         snack(_scaffKey.currentState, 'Failed to load workspace data.');
       } else {
         print(res.data);
-        _wsData = res.data;
-        _workspace = Workspace.fromJson(_wsData['info'],
-            invitations: _wsData['invitations'],
-            calendars: _wsData['calendars'],
-            ownerData: _wsData['owner']);
+        Map wsData = res.data;
+        _workspace = Workspace.fromJson(wsData['info'],
+            invitations: wsData['invitations'],
+            calendars: wsData['calendars'],
+            ownerData: wsData['owner']);
         _isOwner = _workspace.owner?.id == appState.profile.id;
         setState(() {});
       }

@@ -64,6 +64,21 @@ query LoadWorkspace {
   return res;
 }
 
+Future fetchOwner(int workspaceId) async {
+  QueryResult res = await gql.rawQuery('''
+query GetOwner {
+  owner: workspaceOwner(workspaceId: $workspaceId) {
+    firstName,
+    lastName,
+    email,
+    userId,
+  }
+}  
+  ''');
+
+  return res;
+}
+
 Future addMember(String email, DateTime startDate, int workspaceId) async {
   QueryResult res = await gql.rawMutation('''
 mutation AddMember {
@@ -81,6 +96,27 @@ Future removeMember(String email, int workspaceId) async {
 mutation RemoveMember {
   removeWorkspaceMember(email: "$email", wsId: $workspaceId){
     ok
+  }
+}
+  ''');
+
+  return res;
+}
+
+
+Future fetchCalendar(int id) async {
+  QueryResult res = await gql.rawQuery('''
+query LoadCalendar {
+  calendar: workspaceCalendarById(calendarId: $id) {
+    id,
+    name,
+    wsId,
+  }
+  holidays: calendarHolidays(calendarId: $id) {
+    id,
+    name,
+    calendarId,
+    date
   }
 }
   ''');

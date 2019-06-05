@@ -180,7 +180,9 @@ class _WorkspaceCalendarsListViewState
       return ListTile(
         title: Text(cal.name),
         onTap: () {
-          print('tap tap tap');
+          Navigator.of(context).pushNamed('/workspace-calendar', arguments: {
+            'id': cal.id
+          });
         },
         trailing: widget.editable
             ? IconButton(

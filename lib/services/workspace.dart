@@ -147,3 +147,26 @@ mutation RemoveCalendar {
 
   return res;
 }
+
+Future removeHoliday(int holidayId) async {
+  QueryResult res = await gql.rawMutation('''
+mutation RemoveHoliday {
+  removeHoliday(id: $holidayId) {
+    ok
+  }
+}
+  ''');
+
+  return res;
+}
+Future addHoliday(int calendarId, DateTime date, String name) async {
+  QueryResult res = await gql.rawMutation('''
+mutation AddHoliday {
+  addHoliday(calendarId: $calendarId, date: "${formatForGQL(date)}", name: "$name") {
+    ok
+  }
+}
+  ''');
+
+  return res;
+}

@@ -102,10 +102,10 @@ class Holiday {
   Holiday.fromJson(Map data)
     : _id = int.parse(data['id']),
       _name = data['name'],
-      _calendarId = int.parse(data['calendarId']),
+      _calendarId = data['calendarId'],
       _date = DateTime.parse(data['date']);
 
-  int get id => id;
+  int get id => _id;
   int get calendarId => _calendarId;
   String get name => _name;
   DateTime get date => _date;

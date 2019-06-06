@@ -46,8 +46,8 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
 
   Future<dynamic> _makeEvents() async {
     try {
+      _eventList = EventList<Event>(events: {});
       var leaves = await appState.fetchTeamLeaves();
-      print(leaves);
       _mapLeavesToEvents(leaves);
       var holidays = await appState.fetchTeamHolidays();
       _mapHolidaysToEvents(holidays);
@@ -85,7 +85,6 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
       }
     }
 
-    _eventList = EventList<Event>(events: {});
     _leavesByDate = {};
 
     Map<String, List> addedTypes = {};
@@ -122,6 +121,7 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
 
   _mapHolidaysToEvents(List holidaysData) {
     print('map holidays');
+    _holidaysByDate = {};
     holidaysData.asMap().forEach((idx, item) {
       for (Holiday day in item['holidays']) {
         if (_holidaysByDate[day.date] == null) {

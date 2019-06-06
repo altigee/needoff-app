@@ -6,6 +6,7 @@ import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:needoff/app_state.dart' show appState, AppStateException;
+import 'package:needoff/models/workspace.dart';
 import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/utils/ui.dart';
 import 'package:needoff/models/leave.dart'
@@ -22,6 +23,7 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
 
   EventList<Event> _eventList;
   Map<DateTime, List> _leavesByDate = {};
+  Map<DateTime, List> _holidaysByDate = {};
 
   final _scaffKey = GlobalKey<ScaffoldState>();
 
@@ -42,18 +44,19 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
     });
   }
 
-  Future<dynamic> _makeEvents() {
-    return appState.fetchTeamLeaves().then((res) {
-      print(res);
-      _mapToEvents(res);
+  Future<dynamic> _makeEvents() async {
+    try {
+      var leaves = await appState.fetchTeamLeaves();
+      print(leaves);
+      _mapLeavesToEvents(leaves);
+      var holidays = await appState.fetchTeamHolidays();
+      _mapHolidaysToEvents(holidays);
       setState(() {});
-    }).catchError((e) {
-      if (e is AppStateException) {
-        snack(_scaffKey.currentState, e.message);
-      } else {
-        snack(_scaffKey.currentState, 'Something went wrong :(');
-      }
-    });
+    } on AppStateException catch (e) {
+      snack(_scaffKey.currentState, e.message);
+    } catch (e) {
+      snack(_scaffKey.currentState, 'Something went wrong :(');
+    }
   }
 
   _buildEventIcon(color) {
@@ -68,7 +71,7 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
     );
   }
 
-  _mapToEvents(data) {
+  _mapLeavesToEvents(data) {
     Map<String, List> leavesByType = {
       LeaveTypes.SICK_LEAVE: [],
       LeaveTypes.VACATION: [],
@@ -115,6 +118,29 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
         }
       }
     }
+  }
+
+  _mapHolidaysToEvents(List holidaysData) {
+    print('map holidays');
+    holidaysData.asMap().forEach((idx, item) {
+      for (Holiday day in item['holidays']) {
+        if (_holidaysByDate[day.date] == null) {
+          _holidaysByDate[day.date] = [];
+        }
+        var color = Calendar.colors[idx] ?? Colors.black54;
+        _holidaysByDate[day.date].add({
+          'calendar': item['calendar'],
+          'holiday': day,
+          'color': color,
+        });
+        _eventList.add(
+            day.date,
+            Event(
+              date: day.date,
+              icon: _buildEventIcon(color),
+            ));
+      }
+    });
   }
 
   @override
@@ -190,6 +216,22 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
       return _buildUser(leave);
     }).toList();
 
+    List dayHolidays = _holidaysByDate[_currentDate] ?? [];
+    _events.addAll(dayHolidays.map((item) {
+      return ListTile(
+        leading: Icon(
+          Icons.calendar_today,
+          size: 32,
+        ),
+        title: Text(item['holiday'].name),
+        subtitle: Text(item['calendar'].name,
+            style: TextStyle(
+              inherit: true,
+              color: item['color'],
+            )),
+      );
+    }));
+
     return Expanded(
       flex: 5,
       child: Container(
@@ -214,7 +256,7 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
               ),
             ),
             Expanded(
-                child: dayLeaves.length > 0
+                child: _events.length > 0
                     ? ListView(children: _events)
                     : Center(
                         child: Text('No entries.',

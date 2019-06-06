@@ -103,6 +103,19 @@ mutation RemoveMember {
   return res;
 }
 
+Future fetchWorkspaceCalendars(int workspaceId) async {
+  QueryResult res = await gql.rawQuery('''
+query LoadCalendars {  
+  calendars: workspaceCalendars(workspaceId: $workspaceId) {
+    id,
+    name,
+    wsId
+  }
+}
+  ''');
+
+  return res;
+}
 
 Future fetchCalendar(int id) async {
   QueryResult res = await gql.rawQuery('''
@@ -113,6 +126,21 @@ query LoadCalendar {
     wsId,
   }
   holidays: calendarHolidays(calendarId: $id) {
+    id,
+    name,
+    calendarId,
+    date
+  }
+}
+  ''');
+
+  return res;
+}
+
+Future fetchHolidays(int calendarId) async {
+  QueryResult res = await gql.rawQuery('''
+query LoadHolidays {
+  holidays: calendarHolidays(calendarId: $calendarId) {
     id,
     name,
     calendarId,
@@ -159,6 +187,7 @@ mutation RemoveHoliday {
 
   return res;
 }
+
 Future addHoliday(int calendarId, DateTime date, String name) async {
   QueryResult res = await gql.rawMutation('''
 mutation AddHoliday {

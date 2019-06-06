@@ -31,7 +31,7 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   void removeAllListeners() {
-    for(var listener in _listenersList) {
+    for (var listener in _listenersList) {
       super.removeListener(listener);
     }
   }
@@ -141,7 +141,7 @@ class AppState {
     }
     return fetchLeaves();
   }
-  
+
   Future fetchTeamLeaves() async {
     int workspaceId = await storage.getWorkspace();
     QueryResult res = await leavesServ.fetchTeamLeaves(workspaceId);
@@ -184,6 +184,32 @@ class AppState {
     }
 
     return fetchWorkspaces();
+  }
+
+  Future fetchTeamHolidays() async {
+    int wsId = await storage.getWorkspace();
+    if (wsId != null) {
+      var teamHolidays = [];
+      var calData = await workspaceServ.fetchWorkspaceCalendars(wsId);
+      if (calData.hasErrors || calData.data == null) {
+        throw AppStateException('Failed to load team calendars.');
+      }
+      var calList = calData.data['calendars'] ?? [];
+      for (var cal in calList) {
+        var holData = await workspaceServ.fetchHolidays(int.parse(cal['id']));
+        if (!holData.hasErrors && holData.data != null) {
+          var holidays = holData.data['holidays'] ?? [];
+          teamHolidays.add({
+            'calendar': Calendar.fromJson(cal),
+            'holidays': holidays.map((item) => Holiday.fromJson(item)).toList(),
+          });
+        }
+      }
+      return teamHolidays;
+    } else {
+      throw AppStateException(
+          'Failed to load team holidays, no workspace selected.');
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import 'package:needoff/models/profile.dart' show Profile;
@@ -90,6 +91,15 @@ class Calendar {
   int get id => _id;
   String get name => _name;
   int get workspaceId => _workspaceId;
+
+  static final colors = [
+    Colors.orange,
+    Colors.teal,
+    Colors.pink[200],
+    Colors.cyanAccent,
+    Colors.indigo,
+    Colors.lime
+  ];
 }
 
 class Holiday {

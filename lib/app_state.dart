@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:needoff/api/gql.dart';
 import 'package:needoff/models/credentials.dart';
 
 import 'package:needoff/models/profile.dart';
@@ -44,6 +45,13 @@ class AppState {
   Profile _profile;
   List<Workspace> _workspaces = [];
   List<Leave> _leaves = [];
+  
+  AppState() {
+    invalidTokenNotifier.addListener((){
+      print('GQL ERROR : Invalid token : logout');
+      logout();
+    });
+  }
 
   Profile get profile => _profile;
   List<Workspace> get workspaces => _workspaces ?? [];

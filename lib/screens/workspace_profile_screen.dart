@@ -31,7 +31,7 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
       Map args = ModalRoute.of(context).settings.arguments;
       if (args != null && (_wsId = Map.from(args)['id']) != null) {
         loadWorkspace().whenComplete(() {
-          setState(() {});
+          if(mounted) setState(() {});
         });
       }
     });
@@ -55,7 +55,7 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
             calendars: wsData['calendars'],
             ownerData: wsData['owner']);
         _isOwner = _workspace.owner?.id == appState.profile.id;
-        setState(() {});
+        if (mounted) setState(() {});
       }
     });
   }

@@ -45,9 +45,9 @@ class AppState {
   Profile _profile;
   List<Workspace> _workspaces = [];
   List<Leave> _leaves = [];
-  
+
   AppState() {
-    invalidTokenNotifier.addListener((){
+    invalidTokenNotifier.addListener(() {
       print('GQL ERROR : Invalid token : logout');
       logout();
     });
@@ -198,20 +198,10 @@ class AppState {
     int wsId = await storage.getWorkspace();
     if (wsId != null) {
       var teamHolidays = [];
-      var calData = await workspaceServ.fetchWorkspaceCalendars(wsId);
-      if (calData.hasErrors || calData.data == null) {
-        throw AppStateException('Failed to load team calendars.');
-      }
-      var calList = calData.data['calendars'] ?? [];
-      for (var cal in calList) {
-        var holData = await workspaceServ.fetchHolidays(int.parse(cal['id']));
-        if (!holData.hasErrors && holData.data != null) {
-          var holidays = holData.data['holidays'] ?? [];
-          teamHolidays.add({
-            'calendar': Calendar.fromJson(cal),
-            'holidays': holidays.map((item) => Holiday.fromJson(item)).toList(),
-          });
-        }
+      var holData = await workspaceServ.fetchHolidays(wsId);
+      if (!holData.hasErrors && holData.data != null) {
+        var holidays = holData.data['holidays'] ?? [];
+        teamHolidays = holidays.map((item) => Holiday.fromJson(item)).toList();
       }
       return teamHolidays;
     } else {

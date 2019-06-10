@@ -53,10 +53,10 @@ query LoadWorkspace {
     email,
     status
   }
-  calendars: workspaceCalendars(workspaceId: $id) {
+  holidays: workspaceHolidays(workspaceId: $id) {
     id,
     name,
-    wsId
+    date
   }
 }
   ''');
@@ -103,72 +103,13 @@ mutation RemoveMember {
   return res;
 }
 
-Future fetchWorkspaceCalendars(int workspaceId) async {
-  QueryResult res = await gql.rawQuery('''
-query LoadCalendars {  
-  calendars: workspaceCalendars(workspaceId: $workspaceId) {
-    id,
-    name,
-    wsId
-  }
-}
-  ''');
-
-  return res;
-}
-
-Future fetchCalendar(int id) async {
-  QueryResult res = await gql.rawQuery('''
-query LoadCalendar {
-  calendar: workspaceCalendarById(calendarId: $id) {
-    id,
-    name,
-    wsId,
-  }
-  holidays: calendarHolidays(calendarId: $id) {
-    id,
-    name,
-    calendarId,
-    date
-  }
-}
-  ''');
-
-  return res;
-}
-
-Future fetchHolidays(int calendarId) async {
+Future fetchHolidays(int workspaceId) async {
   QueryResult res = await gql.rawQuery('''
 query LoadHolidays {
-  holidays: calendarHolidays(calendarId: $calendarId) {
+  holidays: workspaceHolidays(workspaceId: $workspaceId) {
     id,
     name,
-    calendarId,
     date
-  }
-}
-  ''');
-
-  return res;
-}
-
-Future createCalendar(String name, int workspaceId) async {
-  QueryResult res = await gql.rawMutation('''
-mutation CreateCalendar {
-  createWorkspaceCalendar(name: "$name", wsId: $workspaceId) {
-    ok
-  }
-}
-  ''');
-
-  return res;
-}
-
-Future removeCalendar(int calendarId) async {
-  QueryResult res = await gql.rawMutation('''
-mutation RemoveCalendar {
-  removeWorkspaceCalendar(id: $calendarId) {
-    ok
   }
 }
   ''');
@@ -188,10 +129,10 @@ mutation RemoveHoliday {
   return res;
 }
 
-Future addHoliday(int calendarId, DateTime date, String name) async {
+Future addHoliday(int workspaceId, DateTime date, String name) async {
   QueryResult res = await gql.rawMutation('''
 mutation AddHoliday {
-  addHoliday(calendarId: $calendarId, date: "${formatForGQL(date)}", name: "$name") {
+  addHoliday(wsId: $workspaceId, date: "${formatForGQL(date)}", name: "$name") {
     ok
   }
 }

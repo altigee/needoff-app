@@ -127,7 +127,7 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
         if (_holidaysByDate[day.date] == null) {
           _holidaysByDate[day.date] = [];
         }
-        var color = Calendar.colors[idx] ?? Colors.black54;
+        var color = Colors.black54;
         _holidaysByDate[day.date].add({
           'calendar': item['calendar'],
           'holiday': day,

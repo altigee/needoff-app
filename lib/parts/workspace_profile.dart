@@ -5,8 +5,8 @@ import 'package:needoff/models/workspace.dart'
         WorkspaceInvitation,
         WorkspaceUpdateCallback,
         WorkspaceInvitationRemoveCallback,
-        Calendar,
-        WorkspaceCalendarRemoveCallback;
+        Holiday,
+        WorkspaceHolidayRemoveCallback;
 import 'package:needoff/parts/info_row.dart';
 import 'package:needoff/utils/dates.dart';
 import 'package:needoff/utils/ui.dart';
@@ -162,28 +162,33 @@ class _WorkspaceInvitationsViewState extends State<WorkspaceInvitationsView> {
   }
 }
 
-class WorkspaceCalendarsListView extends StatefulWidget {
+class WorkspaceHolidaysListView extends StatefulWidget {
   final Workspace workspace;
   final bool editable;
-  final WorkspaceCalendarRemoveCallback removeCallback;
-  WorkspaceCalendarsListView(this.workspace,
+  final WorkspaceHolidayRemoveCallback removeCallback;
+  WorkspaceHolidaysListView(this.workspace,
       {this.editable = false, this.removeCallback});
   @override
-  _WorkspaceCalendarsListViewState createState() =>
-      _WorkspaceCalendarsListViewState();
+  _WorkspaceHolidaysListViewState createState() =>
+      _WorkspaceHolidaysListViewState();
 }
 
-class _WorkspaceCalendarsListViewState
-    extends State<WorkspaceCalendarsListView> {
+class _WorkspaceHolidaysListViewState extends State<WorkspaceHolidaysListView> {
   List<Widget> _buildList(List data) {
-    return data.map((cal) {
+    return data.map((hol) {
       return ListTile(
-        title: Text(cal.name),
-        onTap: () {
-          Navigator.of(context).pushNamed('/workspace-calendar', arguments: {
-            'id': cal.id
-          });
-        },
+        title: widget.editable ? Row(
+          children: [
+            SizedBox(
+              width: 90,
+              child: Text(
+                formatDate(hol.date),
+                style: TextStyle(inherit: true, fontSize: 12),
+              ),
+            ),
+            Text(hol.name),
+          ],
+        ) : Text(hol.name),
         trailing: widget.editable
             ? IconButton(
                 icon: Icon(Icons.delete),
@@ -193,28 +198,27 @@ class _WorkspaceCalendarsListViewState
                   if (res != null &&
                       res['ok'] &&
                       widget.removeCallback is Function) {
-                    widget.removeCallback(cal.id);
+                    widget.removeCallback(hol.id);
                   }
                 },
               )
-            : null,
+            : Text(formatDate(hol.date)),
       );
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Calendar> data = widget.workspace?.calendars ?? [];
+    List<Holiday> data = widget.workspace?.holidays ?? [];
     return Container(
       child: data.length == 0
           ? Center(
-              child: Text('No calendars found.'),
+              child: Text('No holidays found.'),
             )
           : ListView(
               children: _buildList(data),
             ),
     );
-    ;
   }
 }
 
@@ -252,7 +256,9 @@ Future openAddMemberDialog(BuildContext context) {
           controller: _startInpCtrl,
           focusNode: fn,
           enableInteractiveSelection: false,
-          decoration: InputDecoration(labelText: 'First day:'),
+          decoration: InputDecoration(
+            labelText: 'First day:',
+          ),
         ),
       ],
     ),
@@ -276,42 +282,60 @@ Future openAddMemberDialog(BuildContext context) {
   );
 }
 
-Future openAddCalendarDialog(BuildContext context) {
+Future openAddHolidayDialog(BuildContext context) {
   var formKey = GlobalKey<FormState>();
-  TextEditingController _nameInpCtrl = TextEditingController();
-  Widget form = Form(
-    key: formKey,
-    child: Column(
-      children: <Widget>[
-        TextFormField(
-          autofocus: true,
-          keyboardType: TextInputType.emailAddress,
-          controller: _nameInpCtrl,
-          validator: (value) {
-            if (value.isEmpty) {
-              return 'Please enter a name';
-            }
-          },
-          decoration: InputDecoration(
-            labelText: 'Calendar name:',
-            hintText: 'e.g Ukrainian holidays',
-          ),
+  var nameCtrl = TextEditingController();
+  var dateCtrl = TextEditingController();
+  var fn = FocusNode();
+  return openEditFormDialog(context,
+      dialogTitle: 'Add date',
+      form: Form(
+        key: formKey,
+        child: Column(
+          children: <Widget>[
+            TextFormField(
+              keyboardType: TextInputType.emailAddress,
+              controller: nameCtrl,
+              validator: (value) {
+                if (value.isEmpty) {
+                  return 'Please enter a name';
+                }
+              },
+              decoration: InputDecoration(
+                labelText: 'Title:',
+              ),
+            ),
+            FormField(validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select a date';
+              }
+            }, builder: (FormFieldState<String> state) {
+              return TextField(
+                onTap: () async {
+                  fn.unfocus();
+                  var res = await openDatePicker(context,
+                      firstDate: DateTime.now().subtract(Duration(days: 365)));
+                  if (res != null) {
+                    dateCtrl.text = formatDate(res);
+                    state.didChange(formatDate(res));
+                  }
+                },
+                onChanged: state.didChange,
+                controller: dateCtrl,
+                focusNode: fn,
+                enableInteractiveSelection: false,
+                decoration: InputDecoration(
+                    labelText: 'Date:', errorText: state.errorText),
+              );
+            }),
+          ],
         ),
-      ],
-    ),
-  );
-
-  return openEditFormDialog(
-    context,
-    form: form,
-    dialogTitle: 'New Calendar',
-    onCancel: () {
-      Navigator.pop(context);
-    },
-    onOk: () {
-      if ((form.key as GlobalKey<FormState>).currentState.validate()) {
-        Navigator.pop(context, {'name': _nameInpCtrl.text});
-      }
-    },
-  );
+      ), onCancel: () {
+    Navigator.of(context).pop();
+  }, onOk: () {
+    if (formKey.currentState.validate()) {
+      Navigator.of(context)
+          .pop({'name': nameCtrl.text, 'date': parseFormatted(dateCtrl.text)});
+    }
+  });
 }

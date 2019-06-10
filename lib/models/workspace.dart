@@ -8,9 +8,7 @@ typedef WorkspaceInvitationAddCallback(
     {@required String email, @required int workspaceId});
 typedef WorkspaceInvitationRemoveCallback(
     {@required String email, @required int workspaceId});
-typedef WorkspaceCalendarAddCallback(
-    {@required String name, @required int workspaceId});
-typedef WorkspaceCalendarRemoveCallback(int id);
+typedef WorkspaceHolidayRemoveCallback(int id);
 
 class Workspace {
   var _id;
@@ -18,31 +16,30 @@ class Workspace {
   String _description;
   List _members;
   List<WorkspaceInvitation> _invitations;
-  List<Calendar> _calendars;
+  List<Holiday> _holidays;
   Profile _owner;
   Workspace(this._name,
       {String description: '',
       int id,
       List members,
       List<WorkspaceInvitation> invitations,
-      List<Calendar> calendars,
+      List<Holiday> holidays,
       Profile owner})
       : this._description = description,
         this._id = id,
         this._members = members,
         this._invitations = invitations,
-        this._calendars = calendars,
+        this._holidays = holidays,
         this._owner = owner;
-  Workspace.fromJson(Map data,
-      {List invitations, Map ownerData, List calendars})
+  Workspace.fromJson(Map data, {List invitations, List holidays, Map ownerData})
       : this._description = data['description'],
         this._id = int.parse(data['id']),
         this._name = data['name'],
         this._invitations = invitations.map((item) {
           return WorkspaceInvitation.fromJson(item);
         }).toList(),
-        this._calendars = calendars.map((item) {
-          return Calendar.fromJson(item);
+        this._holidays = holidays.map((item) {
+          return Holiday.fromJson(item);
         }).toList(),
         this._owner = Profile(ownerData);
 
@@ -55,7 +52,7 @@ class Workspace {
   String get description => _description;
   List get members => _members ?? [];
   List<WorkspaceInvitation> get invitations => _invitations ?? [];
-  List<Calendar> get calendars => _calendars ?? [];
+  List<Holiday> get holidays => _holidays ?? [];
   Profile get owner => _owner;
 }
 
@@ -79,44 +76,18 @@ class WorkspaceInvitationStatus {
   static const REVOKED = 'REVOKED';
 }
 
-class Calendar {
-  int _id;
-  String _name;
-  int _workspaceId;
-  Calendar(this._id, this._name);
-  Calendar.fromJson(Map data)
-      : _id = int.parse(data['id']),
-        _name = data['name'],
-        _workspaceId = data['wsId'] ?? data['workspaceId'];
-  int get id => _id;
-  String get name => _name;
-  int get workspaceId => _workspaceId;
-
-  static final colors = [
-    Colors.orange,
-    Colors.teal,
-    Colors.pink[200],
-    Colors.cyanAccent,
-    Colors.indigo,
-    Colors.lime
-  ];
-}
-
 class Holiday {
   int _id;
   String _name;
-  int _calendarId;
   DateTime _date;
 
-  Holiday(this._id, this._name, this._calendarId, this._date);
+  Holiday(this._id, this._name, this._date);
   Holiday.fromJson(Map data)
-    : _id = int.parse(data['id']),
-      _name = data['name'],
-      _calendarId = data['calendarId'],
-      _date = DateTime.parse(data['date']);
+      : _id = int.parse(data['id']),
+        _name = data['name'],
+        _date = DateTime.parse(data['date']);
 
   int get id => _id;
-  int get calendarId => _calendarId;
   String get name => _name;
   DateTime get date => _date;
 }

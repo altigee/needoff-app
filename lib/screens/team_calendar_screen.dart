@@ -23,7 +23,7 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
 
   EventList<Event> _eventList;
   Map<DateTime, List> _leavesByDate = {};
-  Map<DateTime, List> _holidaysByDate = {};
+  Map<DateTime, List> _workspaceDatesByDate = {};
 
   final _scaffKey = GlobalKey<ScaffoldState>();
 
@@ -49,8 +49,8 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
       _eventList = EventList<Event>(events: {});
       var leaves = await appState.fetchTeamLeaves();
       _mapLeavesToEvents(leaves);
-      var holidays = await appState.fetchTeamHolidays();
-      _mapHolidaysToEvents(holidays);
+      var workspaceDates = await appState.fetchTeamWorkspaceDates();
+      _mapWorkspaceDatesToEvents(workspaceDates);
       setState(() {});
     } on AppStateException catch (e) {
       snack(_scaffKey.currentState, e.message);
@@ -119,27 +119,24 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
     }
   }
 
-  _mapHolidaysToEvents(List holidaysData) {
-    print('map holidays');
-    _holidaysByDate = {};
-    holidaysData.asMap().forEach((idx, item) {
-      for (Holiday day in item['holidays']) {
-        if (_holidaysByDate[day.date] == null) {
-          _holidaysByDate[day.date] = [];
-        }
-        var color = Colors.black54;
-        _holidaysByDate[day.date].add({
-          'calendar': item['calendar'],
-          'holiday': day,
-          'color': color,
-        });
-        _eventList.add(
-            day.date,
-            Event(
-              date: day.date,
-              icon: _buildEventIcon(color),
-            ));
+  _mapWorkspaceDatesToEvents(List workspaceDatesData) {
+    print('map workspaceDates');
+    _workspaceDatesByDate = {};
+    workspaceDatesData.asMap().forEach((idx, day) {
+      if (_workspaceDatesByDate[day.date] == null) {
+        _workspaceDatesByDate[day.date] = [];
       }
+      var color = Colors.black54;
+      _workspaceDatesByDate[day.date].add({
+        'workspaceDate': day,
+        'color': color,
+      });
+      _eventList.add(
+          day.date,
+          Event(
+            date: day.date,
+            icon: _buildEventIcon(color),
+          ));
     });
   }
 
@@ -216,15 +213,15 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
       return _buildUser(leave);
     }).toList();
 
-    List dayHolidays = _holidaysByDate[_currentDate] ?? [];
-    _events.addAll(dayHolidays.map((item) {
+    List dayWorkspaceDates = _workspaceDatesByDate[_currentDate] ?? [];
+    _events.addAll(dayWorkspaceDates.map((item) {
       return ListTile(
         leading: Icon(
           Icons.calendar_today,
           size: 32,
         ),
-        title: Text(item['holiday'].name),
-        subtitle: Text(item['calendar'].name,
+        title: Text(item['workspaceDate'].name),
+        subtitle: Text(item['workspaceDate'].isOfficialHoliday ? 'Public Holiday' : 'Workday',
             style: TextStyle(
               inherit: true,
               color: item['color'],

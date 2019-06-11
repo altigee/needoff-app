@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:needoff/app_state.dart';
 import 'package:needoff/models/workspace.dart' show Workspace;
 import 'package:needoff/parts/app_scaffold.dart';
-import 'package:needoff/parts/workspace_profile.dart';
 import 'package:needoff/services/workspace.dart' as workspaceServ;
 import 'package:needoff/utils/ui.dart';
-import 'package:needoff/parts/workspace_profile.dart'
-    show WorkspaceInfoView, WorkspaceInvitationsView, openAddMemberDialog;
+import 'package:needoff/parts/workspace_profile.dart';
 
 class WorkspaceProfileScreen extends StatefulWidget {
   @override
@@ -52,7 +50,7 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
         Map wsData = res.data;
         _workspace = Workspace.fromJson(wsData['info'],
             invitations: wsData['invitations'],
-            holidays: wsData['holidays'],
+            workspaceDates: wsData['dates'],
             ownerData: wsData['owner']);
         _isOwner = _workspace.owner?.id == appState.profile.id;
         if (mounted) setState(() {});
@@ -78,11 +76,11 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
     }
   }
 
-  removeHoliday(int id) async {
+  removeWorkspaceDate(int id) async {
     try {
-      var res = await workspaceServ.removeHoliday(id);
+      var res = await workspaceServ.removeWorkspaceDate(id);
       if (res.hasErrors) {
-        snack(_scaffKey, 'Failed to remove holiday from calendar.');
+        snack(_scaffKey, 'Failed to remove date from calendar.');
       } else {
         loadWorkspace();
       }
@@ -110,7 +108,7 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
           fab = FloatingActionButton(
             backgroundColor: Theme.of(context).accentColor,
             onPressed: () {
-              _handleAddHoliday(context);
+              _handleAddWorkspaceDate(context);
             },
             child: Icon(Icons.add),
           );
@@ -138,17 +136,18 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
     }
   }
 
-  _handleAddHoliday(BuildContext ctx) async {
-    Map holidayData = await openAddHolidayDialog(ctx);
-    if (holidayData != null) {
+  _handleAddWorkspaceDate(BuildContext ctx) async {
+    Map data = await openAddWorkspaceDateDialog(ctx);
+    if (data != null) {
       try {
-        var res = await workspaceServ.addHoliday(
+        var res = await workspaceServ.addWorkspaceDate(
           _workspace.id,
-          holidayData['date'],
-          holidayData['name'],
+          data['date'],
+          data['name'],
+          data['isOfficialHoliday']
         );
         if (res.hasErrors) {
-          snack(_scaffKey.currentState, 'Failed to add holiday.');
+          snack(_scaffKey.currentState, 'Failed to add date.');
         }
         await loadWorkspace();
       } catch (e) {
@@ -188,8 +187,8 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
                 WorkspaceInvitationsView(_workspace,
                     removeCallback: _isOwner ? removeInvitation : null,
                     editable: _isOwner),
-                WorkspaceHolidaysListView(_workspace,
-                    removeCallback: _isOwner ? removeHoliday : null,
+                WorkspaceDatesListView(_workspace,
+                    removeCallback: _isOwner ? removeWorkspaceDate : null,
                     editable: _isOwner),
               ],
             )

@@ -5,8 +5,8 @@ import 'package:needoff/models/workspace.dart'
         WorkspaceInvitation,
         WorkspaceUpdateCallback,
         WorkspaceInvitationRemoveCallback,
-        Holiday,
-        WorkspaceHolidayRemoveCallback;
+        WorkspaceDate,
+        WorkspaceDateRemoveCallback;
 import 'package:needoff/parts/info_row.dart';
 import 'package:needoff/utils/dates.dart';
 import 'package:needoff/utils/ui.dart';
@@ -162,58 +162,54 @@ class _WorkspaceInvitationsViewState extends State<WorkspaceInvitationsView> {
   }
 }
 
-class WorkspaceHolidaysListView extends StatefulWidget {
+class WorkspaceDatesListView extends StatefulWidget {
   final Workspace workspace;
   final bool editable;
-  final WorkspaceHolidayRemoveCallback removeCallback;
-  WorkspaceHolidaysListView(this.workspace,
+  final WorkspaceDateRemoveCallback removeCallback;
+  WorkspaceDatesListView(this.workspace,
       {this.editable = false, this.removeCallback});
   @override
-  _WorkspaceHolidaysListViewState createState() =>
-      _WorkspaceHolidaysListViewState();
+  _WorkspaceDatesListViewState createState() => _WorkspaceDatesListViewState();
 }
 
-class _WorkspaceHolidaysListViewState extends State<WorkspaceHolidaysListView> {
+class _WorkspaceDatesListViewState extends State<WorkspaceDatesListView> {
   List<Widget> _buildList(List data) {
     return data.map((hol) {
+      var _dateTxt = Text(formatDate(hol.date));
+      var _official = hol.isOfficialHoliday;
       return ListTile(
-        title: widget.editable ? Row(
-          children: [
-            SizedBox(
-              width: 90,
-              child: Text(
-                formatDate(hol.date),
-                style: TextStyle(inherit: true, fontSize: 12),
-              ),
-            ),
-            Text(hol.name),
+        title: Text(hol.name),
+        subtitle: Text(_official ? 'Public Holiday' : 'Workday'),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            if (widget.editable) _dateTxt,
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () async {
+                var res = await openConfirmation(context,
+                    title: 'Are you sure?', okLabel: 'remove');
+                if (res != null &&
+                    res['ok'] &&
+                    widget.removeCallback is Function) {
+                  widget.removeCallback(hol.id);
+                }
+              },
+            )
           ],
-        ) : Text(hol.name),
-        trailing: widget.editable
-            ? IconButton(
-                icon: Icon(Icons.delete),
-                onPressed: () async {
-                  var res = await openConfirmation(context,
-                      title: 'Are you sure?', okLabel: 'remove');
-                  if (res != null &&
-                      res['ok'] &&
-                      widget.removeCallback is Function) {
-                    widget.removeCallback(hol.id);
-                  }
-                },
-              )
-            : Text(formatDate(hol.date)),
+        ),
       );
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Holiday> data = widget.workspace?.holidays ?? [];
+    List<WorkspaceDate> data = widget.workspace?.workspaceDates ?? [];
     return Container(
       child: data.length == 0
           ? Center(
-              child: Text('No holidays found.'),
+              child: Text('No dates found.'),
             )
           : ListView(
               children: _buildList(data),
@@ -282,10 +278,11 @@ Future openAddMemberDialog(BuildContext context) {
   );
 }
 
-Future openAddHolidayDialog(BuildContext context) {
+Future openAddWorkspaceDateDialog(BuildContext context) {
   var formKey = GlobalKey<FormState>();
   var nameCtrl = TextEditingController();
   var dateCtrl = TextEditingController();
+  bool _isOfficial = false;
   var fn = FocusNode();
   return openEditFormDialog(context,
       dialogTitle: 'Add date',
@@ -328,14 +325,38 @@ Future openAddHolidayDialog(BuildContext context) {
                     labelText: 'Date:', errorText: state.errorText),
               );
             }),
+            SizedBox(
+              height: 32,
+            ),
+            FormField(
+              builder: (FormFieldState state) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Checkbox(
+                      onChanged: (value) {
+                        print('changed to $value');
+                        _isOfficial = value;
+                        state.didChange(value);
+                      },
+                      value: _isOfficial,
+                    ),
+                    Text('Official Holiday'),
+                  ],
+                );
+              },
+            )
           ],
         ),
       ), onCancel: () {
     Navigator.of(context).pop();
   }, onOk: () {
     if (formKey.currentState.validate()) {
-      Navigator.of(context)
-          .pop({'name': nameCtrl.text, 'date': parseFormatted(dateCtrl.text)});
+      Navigator.of(context).pop({
+        'name': nameCtrl.text,
+        'date': parseFormatted(dateCtrl.text),
+        'isOfficialHoliday': _isOfficial
+      });
     }
   });
 }

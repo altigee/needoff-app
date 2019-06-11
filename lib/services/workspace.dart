@@ -53,10 +53,11 @@ query LoadWorkspace {
     email,
     status
   }
-  holidays: workspaceHolidays(workspaceId: $id) {
+  dates: workspaceDates(workspaceId: $id) {
     id,
     name,
-    date
+    date,
+    isOfficialHoliday
   }
 }
   ''');
@@ -103,13 +104,14 @@ mutation RemoveMember {
   return res;
 }
 
-Future fetchHolidays(int workspaceId) async {
+Future fetchWorkspaceDates(int workspaceId) async {
   QueryResult res = await gql.rawQuery('''
-query LoadHolidays {
-  holidays: workspaceHolidays(workspaceId: $workspaceId) {
+query LoadWorkspaceDates {
+  dates: workspaceDates(workspaceId: $workspaceId) {
     id,
     name,
-    date
+    date,
+    isOfficialHoliday
   }
 }
   ''');
@@ -117,10 +119,10 @@ query LoadHolidays {
   return res;
 }
 
-Future removeHoliday(int holidayId) async {
+Future removeWorkspaceDate(int workspaceDateId) async {
   QueryResult res = await gql.rawMutation('''
-mutation RemoveHoliday {
-  removeHoliday(id: $holidayId) {
+mutation RemoveWorkspaceDate {
+  removeWorkspaceDate(id: $workspaceDateId) {
     ok
   }
 }
@@ -129,10 +131,10 @@ mutation RemoveHoliday {
   return res;
 }
 
-Future addHoliday(int workspaceId, DateTime date, String name) async {
+Future addWorkspaceDate(int workspaceId, DateTime date, String name, bool isOfficialHoliday) async {
   QueryResult res = await gql.rawMutation('''
-mutation AddHoliday {
-  addHoliday(wsId: $workspaceId, date: "${formatForGQL(date)}", name: "$name") {
+mutation AddWorkspaceDate {
+  addWorkspaceDate(wsId: $workspaceId, date: "${formatForGQL(date)}", name: "$name", isOfficialHoliday: $isOfficialHoliday) {
     ok
   }
 }

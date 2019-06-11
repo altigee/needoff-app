@@ -194,19 +194,19 @@ class AppState {
     return fetchWorkspaces();
   }
 
-  Future fetchTeamHolidays() async {
+  Future fetchTeamWorkspaceDates() async {
     int wsId = await storage.getWorkspace();
     if (wsId != null) {
-      var teamHolidays = [];
-      var holData = await workspaceServ.fetchHolidays(wsId);
+      var wsDates = [];
+      var holData = await workspaceServ.fetchWorkspaceDates(wsId);
       if (!holData.hasErrors && holData.data != null) {
-        var holidays = holData.data['holidays'] ?? [];
-        teamHolidays = holidays.map((item) => Holiday.fromJson(item)).toList();
+        var dates = holData.data['dates'] ?? [];
+        wsDates = dates.map((item) => WorkspaceDate.fromJson(item)).toList();
       }
-      return teamHolidays;
+      return wsDates;
     } else {
       throw AppStateException(
-          'Failed to load team holidays, no workspace selected.');
+          'Failed to load data, no workspace selected.');
     }
   }
 }

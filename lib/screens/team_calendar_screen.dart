@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:needoff/app_state.dart' show appState, AppStateException;
-import 'package:needoff/models/workspace.dart';
 import 'package:needoff/parts/app_scaffold.dart';
+import 'package:needoff/utils/dates.dart';
 import 'package:needoff/utils/ui.dart';
 import 'package:needoff/models/leave.dart'
     show LeaveTypes, LeaveTypeColors, LeaveTypeLabels;
@@ -80,8 +79,8 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
     };
 
     for (var item in data) {
-      if (leavesByType[item['leaveType']] != null) {
-        leavesByType[item['leaveType']].add(item);
+      if (leavesByType[item.type] != null) {
+        leavesByType[item.type].add(item);
       }
     }
 
@@ -92,8 +91,8 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
     for (var type in leavesByType.keys) {
       addedTypes[type] = [];
       for (var leave in leavesByType[type]) {
-        DateTime startDate = DateTime.parse(leave['startDate']);
-        DateTime endDate = DateTime.parse(leave['endDate']);
+        DateTime startDate = leave.startDate;
+        DateTime endDate = leave.endDate;
         int duration = endDate.difference(startDate).inDays + 1;
         if (duration < 0) {
           continue;
@@ -221,7 +220,10 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
           size: 32,
         ),
         title: Text(item['workspaceDate'].name),
-        subtitle: Text(item['workspaceDate'].isOfficialHoliday ? 'Public Holiday' : 'Workday',
+        subtitle: Text(
+            item['workspaceDate'].isOfficialHoliday
+                ? 'Public Holiday'
+                : 'Workday',
             style: TextStyle(
               inherit: true,
               color: item['color'],
@@ -266,9 +268,13 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
   }
 
   Widget _buildUser(leave) {
-    Map user = leave["user"];
-    int days = 2;
-    var type = leave['leaveType'];
+    Map user = leave.userData;
+    var type = leave.type;
+
+    String userDisplay = '${user['firstName']} ${user['lastName']}';
+    if (userDisplay.isEmpty) {
+      userDisplay = user['email'];
+    } 
 
     String _userInits = user["name"] ?? user['email'][0];
 
@@ -281,21 +287,24 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
     );
 
     String typeLabel = LeaveTypeLabels[type];
-    String daysLabel = Intl.plural(days, one: '$days day', other: '$days days');
+    var start = leave.startDate;
+    var end = leave.endDate;
+    String daysLabel =
+        start != end ? '${formatDate(start)} - ${formatDate(end)}' : '1 day';
 
     return ListTile(
       leading: _userAvatar,
-      title: Text('${user["email"]}'),
+      title: Text(userDisplay),
       subtitle: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            '$typeLabel - ($daysLabel)',
+            '$typeLabel ${start == end ? '($daysLabel)' : ''}',
             style: TextStyle(color: LeaveTypeColors[type]),
           ),
-          Text(
-            leave['comment'] ?? '',
+          if (start != end) Text(
+            daysLabel,
             style: Theme.of(context).textTheme.caption,
           )
         ],

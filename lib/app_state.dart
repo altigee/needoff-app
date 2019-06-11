@@ -154,7 +154,9 @@ class AppState {
     int workspaceId = await storage.getWorkspace();
     QueryResult res = await leavesServ.fetchTeamLeaves(workspaceId);
     if (!res.hasErrors && res.data != null) {
-      return res.data['leaves'];
+      return (res.data['leaves'] ?? []).map((item){
+        return Leave.fromJson(item);
+      }).toList();
     } else {
       throw AppStateException('Failed to load team calendar.');
     }

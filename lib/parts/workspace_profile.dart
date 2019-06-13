@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:needoff/models/workspace.dart'
     show
         Workspace,
@@ -6,7 +7,8 @@ import 'package:needoff/models/workspace.dart'
         WorkspaceUpdateCallback,
         WorkspaceInvitationRemoveCallback,
         WorkspaceDate,
-        WorkspaceDateRemoveCallback;
+        WorkspaceDateRemoveCallback,
+        Policy;
 import 'package:needoff/parts/info_row.dart';
 import 'package:needoff/utils/dates.dart';
 import 'package:needoff/utils/ui.dart';
@@ -16,8 +18,9 @@ class WorkspaceInfoView extends StatefulWidget {
   final Workspace workspace;
   final WorkspaceUpdateCallback handleUpdateCallback;
   final editable;
+  final loading;
   WorkspaceInfoView(this.workspace,
-      {this.handleUpdateCallback, this.editable = false});
+      {this.handleUpdateCallback, this.editable = false, this.loading = false});
   @override
   _WorkspaceInfoViewState createState() => _WorkspaceInfoViewState();
 }
@@ -26,15 +29,22 @@ class _WorkspaceInfoViewState extends State<WorkspaceInfoView> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController _nameCtrl = TextEditingController();
   TextEditingController _descrCtrl = TextEditingController();
+  TextEditingController _paidCtrl = TextEditingController(text: '0');
+  TextEditingController _unpaidCtrl = TextEditingController(text: '0');
+  TextEditingController _sickCtrl = TextEditingController(text: '0');
 
   void _handleUpdate() {
     if (widget.handleUpdateCallback != null &&
         _formKey.currentState.validate()) {
       widget.handleUpdateCallback(
-        id: widget.workspace.id,
-        name: _nameCtrl.text,
-        description: _descrCtrl.text,
-      );
+          id: widget.workspace.id,
+          name: _nameCtrl.text,
+          description: _descrCtrl.text,
+          policy: Policy(
+            int.parse(_paidCtrl.text),
+            int.parse(_unpaidCtrl.text),
+            int.parse(_sickCtrl.text),
+          ));
     }
   }
 
@@ -83,6 +93,57 @@ class _WorkspaceInfoViewState extends State<WorkspaceInfoView> {
                         labelText: 'Description',
                       ),
                     ),
+                    SizedBox(
+                      height: 32,
+                    ),
+                    TextFormField(
+                      controller: _paidCtrl,
+                      inputFormatters: [
+                        WhitelistingTextInputFormatter.digitsOnly
+                      ],
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value.isEmpty || int.tryParse(value) == null) {
+                          return 'Enter number of days';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Paid vacation days per year',
+                      ),
+                    ),
+                    TextFormField(
+                      controller: _unpaidCtrl,
+                      inputFormatters: [
+                        WhitelistingTextInputFormatter.digitsOnly
+                      ],
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value.isEmpty || int.tryParse(value) == null) {
+                          return 'Enter number of days';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Unpaid vacation days per year',
+                      ),
+                    ),
+                    TextFormField(
+                      controller: _sickCtrl,
+                      inputFormatters: [
+                        WhitelistingTextInputFormatter.digitsOnly
+                      ],
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value.isEmpty || int.tryParse(value) == null) {
+                          return 'Enter number of days';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Sick leaves per year',
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -95,11 +156,19 @@ class _WorkspaceInfoViewState extends State<WorkspaceInfoView> {
               height: 32,
             ),
             InfoRow(title: 'Owner', value: widget.workspace?.owner?.name),
+            SizedBox(
+              height: 64,
+            ),
             if (widget.editable)
-              RaisedButton(
-                child: Text('Update'),
-                onPressed: _handleUpdate,
-              )
+              SizedBox(
+                width: double.infinity,
+                child: RaisedButton(
+                  child: Text('Update'),
+                  color: Theme.of(context).primaryColor,
+                  textColor: Colors.white,
+                  onPressed: widget.loading ? null : _handleUpdate,
+                ),
+              ),
           ],
         ),
       ),

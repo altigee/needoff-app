@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:needoff/app_state.dart';
-import 'package:needoff/models/workspace.dart' show Workspace;
+import 'package:needoff/models/workspace.dart';
 import 'package:needoff/parts/app_scaffold.dart';
+import 'package:needoff/parts/widget_mixins.dart';
 import 'package:needoff/services/workspace.dart' as workspaceServ;
 import 'package:needoff/utils/ui.dart';
 import 'package:needoff/parts/workspace_profile.dart';
@@ -12,7 +13,7 @@ class WorkspaceProfileScreen extends StatefulWidget {
 }
 
 class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, LoadingState {
   GlobalKey _scaffKey = GlobalKey<ScaffoldState>();
   TabController _tabCtrl;
   int _wsId;
@@ -21,6 +22,7 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
   @override
   void initState() {
     super.initState();
+    setStateFn = setState;
     _tabCtrl = TabController(vsync: this, length: 3, initialIndex: 0);
     _tabCtrl.addListener(() {
       if (!_tabCtrl.indexIsChanging) setState(() {});
@@ -59,10 +61,36 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
   }
 
   updateWorkspace({
-    id,
-    name,
-    description,
-  }) {}
+    int id,
+    String name,
+    String description,
+    Policy policy,
+  }) async {
+    try {
+      loading = true;
+      var res = await workspaceServ.update(id, name, description);
+      if (res.hasErrors) {
+        snack(_scaffKey.currentState, 'Failed to update workspace');
+      } else {
+        snack(_scaffKey.currentState, 'Workspace info updated.',
+            duration: Duration(milliseconds: 300));
+      }
+      res = await workspaceServ.setPolicy(
+          id, policy.paidDays, policy.unpaidDays, policy.sickDays);
+      if (res.hasErrors) {
+        snack(_scaffKey.currentState, 'Failed to update policy');
+      } else {
+        snack(_scaffKey.currentState, 'Policy pdated.',
+            duration: Duration(milliseconds: 300));
+      }
+      await loadWorkspace();
+      await appState.fetchWorkspaces();
+    } catch (e) {
+      snack(_scaffKey.currentState, 'Something went wrong :(');
+    } finally {
+      loading = false;
+    }
+  }
 
   removeInvitation({String email, int workspaceId}) async {
     try {
@@ -140,12 +168,8 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
     Map data = await openAddWorkspaceDateDialog(ctx);
     if (data != null) {
       try {
-        var res = await workspaceServ.addWorkspaceDate(
-          _workspace.id,
-          data['date'],
-          data['name'],
-          data['isOfficialHoliday']
-        );
+        var res = await workspaceServ.addWorkspaceDate(_workspace.id,
+            data['date'], data['name'], data['isOfficialHoliday']);
         if (res.hasErrors) {
           snack(_scaffKey.currentState, 'Failed to add date.');
         }
@@ -181,9 +205,12 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
           ? TabBarView(
               controller: _tabCtrl,
               children: <Widget>[
-                WorkspaceInfoView(_workspace,
-                    handleUpdateCallback: _isOwner ? updateWorkspace : null,
-                    editable: _isOwner),
+                WorkspaceInfoView(
+                  _workspace,
+                  handleUpdateCallback: _isOwner ? updateWorkspace : null,
+                  editable: _isOwner,
+                  loading: loading,
+                ),
                 WorkspaceInvitationsView(_workspace,
                     removeCallback: _isOwner ? removeInvitation : null,
                     editable: _isOwner),

@@ -3,7 +3,8 @@ import 'package:meta/meta.dart';
 
 import 'package:needoff/models/profile.dart' show Profile;
 
-typedef WorkspaceUpdateCallback({int id, String name, String description});
+typedef WorkspaceUpdateCallback(
+    {int id, String name, String description, Policy policy});
 typedef WorkspaceInvitationAddCallback(
     {@required String email, @required int workspaceId});
 typedef WorkspaceInvitationRemoveCallback(
@@ -31,7 +32,8 @@ class Workspace {
         this._invitations = invitations,
         this._workspaceDates = workspaceDates,
         this._owner = owner;
-  Workspace.fromJson(Map data, {List invitations, List workspaceDates, Map ownerData})
+  Workspace.fromJson(Map data,
+      {List invitations, List workspaceDates, Map ownerData})
       : this._description = data['description'],
         this._id = int.parse(data['id']),
         this._name = data['name'],
@@ -82,7 +84,8 @@ class WorkspaceDate {
   DateTime _date;
   bool isOfficialHoliday;
 
-  WorkspaceDate(this._id, this._name, this._date, {this.isOfficialHoliday = true});
+  WorkspaceDate(this._id, this._name, this._date,
+      {this.isOfficialHoliday = true});
   WorkspaceDate.fromJson(Map data)
       : _id = int.parse(data['id']),
         _name = data['name'],
@@ -92,4 +95,11 @@ class WorkspaceDate {
   int get id => _id;
   String get name => _name;
   DateTime get date => _date;
+}
+
+class Policy {
+  int paidDays;
+  int unpaidDays;
+  int sickDays;
+  Policy(this.paidDays, this.unpaidDays, this.sickDays);
 }

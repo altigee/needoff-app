@@ -3,7 +3,7 @@ import 'package:needoff/api/gql.dart' as gql;
 import 'package:needoff/models/leave.dart';
 import 'package:needoff/utils/dates.dart';
 
-create(int workspaceId, Leave leave) async {
+Future<QueryResult> create(int workspaceId, Leave leave) async {
   QueryResult res = await gql.rawMutation('''
 mutation CreateLeave {
   createDayOff(
@@ -25,7 +25,7 @@ mutation CreateLeave {
   return res;
 }
 
-fetch(int workspaceId) async {
+Future<QueryResult> fetch(int workspaceId) async {
   QueryResult res = await gql.rawQuery('''
 query FetchLeaves {
   leaves: myLeaves(workspaceId: $workspaceId) {
@@ -40,7 +40,24 @@ query FetchLeaves {
   return res;
 }
 
-fetchTeamLeaves(int workspaceId) async {
+Future<QueryResult> fetchMyBalance(int workspaceId) async {
+  QueryResult res = await gql.rawQuery('''
+query MyBalance {
+  balance: myBalance(workspaceId: $workspaceId) {
+    leftPaidLeaves,
+    leftUnpaidLeaves,
+    leftSickLeaves,
+    totalPaidLeaves,
+    totalUnpaidLeaves,
+    totalSickLeaves,
+  }
+}
+  ''');
+
+  return res;
+}
+
+Future<QueryResult> fetchTeamLeaves(int workspaceId) async {
   QueryResult res = await gql.rawQuery('''
 query TeamCalendar {
   leaves: teamCalendar(workspaceId: $workspaceId) {

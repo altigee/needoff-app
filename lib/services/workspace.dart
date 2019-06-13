@@ -21,6 +21,31 @@ mutation CreateWS {
   return res;
 }
 
+Future update(int wsId, String name, String description) async {
+  QueryResult res = await gql.rawMutation('''
+mutation UpdateWS {
+  updateWorkspace(wsId: $wsId, name: "$name", description: "$description") {
+    ok,
+  }
+}
+  ''');
+
+  return res;
+}
+
+Future setPolicy(
+    int wsId, int maxPaidVacs, int maxUnpaidVacs, int maxSickDays) async {
+  QueryResult res = await gql.rawMutation('''
+mutation SetPolicy {
+  setWorkspacePolicy(maxPaidVacationsPerYear: $maxPaidVacs, maxSickLeavesPerYear: $maxSickDays, maxUnpaidVacationsPerYear: $maxUnpaidVacs, wsId: $wsId) {
+    ok,
+  }
+}
+  ''');
+
+  return res;
+}
+
 Future fetch() async {
   QueryResult res = await gql.rawQuery('''
 query MyWorkspaces {
@@ -131,7 +156,8 @@ mutation RemoveWorkspaceDate {
   return res;
 }
 
-Future addWorkspaceDate(int workspaceId, DateTime date, String name, bool isOfficialHoliday) async {
+Future addWorkspaceDate(
+    int workspaceId, DateTime date, String name, bool isOfficialHoliday) async {
   QueryResult res = await gql.rawMutation('''
 mutation AddWorkspaceDate {
   addWorkspaceDate(wsId: $workspaceId, date: "${formatForGQL(date)}", name: "$name", isOfficialHoliday: $isOfficialHoliday) {

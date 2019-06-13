@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 
-void snack(source, String text) {
+void snack(source, String text, {Duration duration = const Duration(milliseconds: 1000)}) {
   var scaff;
   if (source is BuildContext) scaff = Scaffold.of(source);
   if (source is ScaffoldState) scaff = source;
   scaff
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(text)));
+    ..showSnackBar(
+      SnackBar(content: Text(text), duration: duration,),
+    );
 }
 
-Future openConfirmation(BuildContext ctx, {String title, String okLabel = 'ok', String cancelLable = 'cancel'}) {
+Future openConfirmation(BuildContext ctx,
+    {String title, String okLabel = 'ok', String cancelLable = 'cancel'}) {
   return showDialog(
       context: ctx,
       builder: (BuildContext context) {
@@ -19,14 +22,16 @@ Future openConfirmation(BuildContext ctx, {String title, String okLabel = 'ok', 
             FlatButton(
               child: Text(
                 cancelLable,
-                style: TextStyle(inherit: true, color: Theme.of(context).primaryColor),
+                style: TextStyle(
+                    inherit: true, color: Theme.of(context).primaryColor),
               ),
               onPressed: () => Navigator.pop(context),
             ),
             FlatButton(
               child: Text(
                 okLabel,
-                style: TextStyle(inherit: true, color: Theme.of(context).accentColor),
+                style: TextStyle(
+                    inherit: true, color: Theme.of(context).accentColor),
               ),
               onPressed: () => Navigator.pop(context, {'ok': true}),
             )

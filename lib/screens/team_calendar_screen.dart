@@ -274,7 +274,7 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
     String userDisplay = '${user['firstName']} ${user['lastName']}';
     if (userDisplay.isEmpty) {
       userDisplay = user['email'];
-    } 
+    }
 
     String _userInits = user["name"] ?? user['email'][0];
 
@@ -303,10 +303,13 @@ class _TeamCalendarState extends State<TeamCalendar> with LoadingState {
             '$typeLabel ${start == end ? '($daysLabel)' : ''}',
             style: TextStyle(color: LeaveTypeColors[type]),
           ),
-          if (start != end) Text(
-            daysLabel,
-            style: Theme.of(context).textTheme.caption,
-          )
+          if (start != end)
+            Text(
+              daysLabel,
+              style: Theme.of(context).textTheme.caption,
+            ),
+
+                Text(leave.comment),
         ],
       ),
       isThreeLine: true,

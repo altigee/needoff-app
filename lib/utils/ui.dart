@@ -4,6 +4,7 @@ void snack(source, String text, {Duration duration = const Duration(milliseconds
   var scaff;
   if (source is BuildContext) scaff = Scaffold.of(source);
   if (source is ScaffoldState) scaff = source;
+  if (source is GlobalKey<ScaffoldState>) scaff = source.currentState;
   scaff
     ..hideCurrentSnackBar()
     ..showSnackBar(

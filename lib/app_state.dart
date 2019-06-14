@@ -125,12 +125,7 @@ class AppState {
       if (res.data['leaves'] != null) {
         List<Leave> tmpLeaves = [];
         for (var item in res.data['leaves']) {
-          tmpLeaves.add(Leave(
-            item['leaveType'],
-            DateTime.parse(item['startDate']),
-            DateTime.parse(item['endDate']),
-            item['comment'],
-          ));
+          tmpLeaves.add(Leave.fromJson(item));
         }
         leaves = tmpLeaves;
         return leaves;
@@ -154,7 +149,7 @@ class AppState {
     int workspaceId = await storage.getWorkspace();
     QueryResult res = await leavesServ.fetchTeamLeaves(workspaceId);
     if (!res.hasErrors && res.data != null) {
-      return (res.data['leaves'] ?? []).map((item){
+      return (res.data['leaves'] ?? []).map((item) {
         return Leave.fromJson(item);
       }).toList();
     } else {
@@ -207,8 +202,7 @@ class AppState {
       }
       return wsDates;
     } else {
-      throw AppStateException(
-          'Failed to load data, no workspace selected.');
+      throw AppStateException('Failed to load data, no workspace selected.');
     }
   }
 }

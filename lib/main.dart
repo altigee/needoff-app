@@ -10,6 +10,7 @@ import 'package:needoff/screens/registration_screen.dart';
 import 'package:needoff/screens/forgot_password_screen.dart';
 import 'package:needoff/screens/profile_screen.dart';
 import 'package:needoff/screens/profile_edit_screen.dart';
+import 'package:needoff/screens/todo_screen.dart';
 import 'package:needoff/screens/workspaces_screen.dart';
 import 'package:needoff/screens/workspace_create_screen.dart';
 import 'package:needoff/screens/workspace_profile_screen.dart';
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
         '/workspace-profile': (BuildContext context) => WorkspaceProfileScreen(),
         '/team-calendar': (BuildContext context) => TeamCalendar(),
         '/person-leaves': (BuildContext context) => PersonLeaves(),
+        '/todo': (BuildContext context) => TodoScreen(),
       },
       initialRoute: '/',
     );

@@ -61,6 +61,7 @@ Future<QueryResult> fetchTeamLeaves(int workspaceId) async {
   QueryResult res = await gql.rawQuery('''
 query TeamCalendar {
   leaves: teamCalendar(workspaceId: $workspaceId) {
+    id,
     leaveType,
     userId,
     startDate,
@@ -75,5 +76,37 @@ query TeamCalendar {
 }
   ''');
 
+  return res;
+}
+
+Future<QueryResult> fetchLeavesForApproval(int workspaceId) async {
+  QueryResult res = await gql.rawQuery('''
+query LeavesForApproval {
+  dayOffsForApproval(workspaceId: $workspaceId) {
+    id,
+    leaveType,
+    startDate,
+    endDate,
+    comment,
+    user {
+      firstName,
+      lastName,
+      email
+    }
+  }
+}
+  ''');
+
+  return res;
+}
+
+Future<QueryResult> approve(int leaveId) async {
+  QueryResult res = await gql.rawMutation('''
+mutation CreateLeave {
+  approveDayOff(dayOffId: $leaveId) {
+    ok
+  }
+}
+  ''');
   return res;
 }

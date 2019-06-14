@@ -3,7 +3,7 @@ import 'package:needoff/api/gql.dart' as gql;
 import 'package:needoff/models/workspace.dart';
 import 'package:needoff/utils/dates.dart';
 
-Future create(Workspace ws) async {
+Future<QueryResult> create(Workspace ws) async {
   String membersStr = '[${ws.members.map((m) => '"$m"').toList().join(',')}]';
   QueryResult res = await gql.rawMutation('''
 mutation CreateWS {
@@ -21,7 +21,7 @@ mutation CreateWS {
   return res;
 }
 
-Future update(int wsId, String name, String description) async {
+Future<QueryResult> update(int wsId, String name, String description) async {
   QueryResult res = await gql.rawMutation('''
 mutation UpdateWS {
   updateWorkspace(wsId: $wsId, name: "$name", description: "$description") {
@@ -33,7 +33,7 @@ mutation UpdateWS {
   return res;
 }
 
-Future setPolicy(
+Future<QueryResult> setPolicy(
     int wsId, int maxPaidVacs, int maxUnpaidVacs, int maxSickDays) async {
   QueryResult res = await gql.rawMutation('''
 mutation SetPolicy {
@@ -46,7 +46,7 @@ mutation SetPolicy {
   return res;
 }
 
-Future fetch() async {
+Future<QueryResult> fetch() async {
   QueryResult res = await gql.rawQuery('''
 query MyWorkspaces {
   workspaces: myWorkspaces {
@@ -59,7 +59,7 @@ query MyWorkspaces {
   return res;
 }
 
-Future fetchWorkspace(int id) async {
+Future<QueryResult> fetchWorkspace(int id) async {
   QueryResult res = await gql.rawQuery('''
 query LoadWorkspace {
   owner: workspaceOwner(workspaceId: $id) {
@@ -90,7 +90,7 @@ query LoadWorkspace {
   return res;
 }
 
-Future fetchOwner(int workspaceId) async {
+Future<QueryResult> fetchOwner(int workspaceId) async {
   QueryResult res = await gql.rawQuery('''
 query GetOwner {
   owner: workspaceOwner(workspaceId: $workspaceId) {
@@ -105,7 +105,8 @@ query GetOwner {
   return res;
 }
 
-Future addMember(String email, DateTime startDate, int workspaceId) async {
+Future<QueryResult> addMember(
+    String email, DateTime startDate, int workspaceId) async {
   QueryResult res = await gql.rawMutation('''
 mutation AddMember {
   addWorkspaceMember(email: "$email", startDate: "${formatForGQL(startDate)}", wsId: $workspaceId){
@@ -117,7 +118,7 @@ mutation AddMember {
   return res;
 }
 
-Future removeMember(String email, int workspaceId) async {
+Future<QueryResult> removeMember(String email, int workspaceId) async {
   QueryResult res = await gql.rawMutation('''
 mutation RemoveMember {
   removeWorkspaceMember(email: "$email", wsId: $workspaceId){
@@ -129,7 +130,7 @@ mutation RemoveMember {
   return res;
 }
 
-Future fetchWorkspaceDates(int workspaceId) async {
+Future<QueryResult> fetchWorkspaceDates(int workspaceId) async {
   QueryResult res = await gql.rawQuery('''
 query LoadWorkspaceDates {
   dates: workspaceDates(workspaceId: $workspaceId) {
@@ -144,7 +145,7 @@ query LoadWorkspaceDates {
   return res;
 }
 
-Future removeWorkspaceDate(int workspaceDateId) async {
+Future<QueryResult> removeWorkspaceDate(int workspaceDateId) async {
   QueryResult res = await gql.rawMutation('''
 mutation RemoveWorkspaceDate {
   removeWorkspaceDate(id: $workspaceDateId) {
@@ -156,7 +157,7 @@ mutation RemoveWorkspaceDate {
   return res;
 }
 
-Future addWorkspaceDate(
+Future<QueryResult> addWorkspaceDate(
     int workspaceId, DateTime date, String name, bool isOfficialHoliday) async {
   QueryResult res = await gql.rawMutation('''
 mutation AddWorkspaceDate {

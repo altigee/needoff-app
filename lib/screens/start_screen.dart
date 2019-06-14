@@ -79,6 +79,14 @@ class _StartScreenState extends State<StartScreen> with LoadingState {
                           },
                     child: Text('Team calendar'),
                   ),
+                  FlatButton(
+                    onPressed: _wsId == null
+                        ? null
+                        : () {
+                            Navigator.of(context).pushNamed('/todo');
+                          },
+                    child: Text('Todo'),
+                  ),
                 ],
               ),
             ),

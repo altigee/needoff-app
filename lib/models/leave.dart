@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
 
 class Leave {
+  int _id;
   String _type;
   DateTime _startDate;
   DateTime _endDate;
   String _comment;
   Map _userData;
 
-  Leave(this._type, this._startDate, this._endDate, this._comment, { Map userData }) : this._userData = userData;
+  Leave(this._type, this._startDate, this._endDate, this._comment,
+      {int id, Map userData})
+      : this._userData = userData,
+        this._id = id;
 
   Leave.fromJson(Map data)
-    : this._type = data['leaveType'],
-      this._startDate = DateTime.parse(data['startDate']),
-      this._endDate = DateTime.parse(data['endDate']),
-      this._comment = data['comment'],
-      this._userData = data['user'] ?? data['userData'];
+      : this._id = data['id'] is int ? data['id'] : int.tryParse(data['id']),
+        this._type = data['leaveType'],
+        this._startDate = DateTime.parse(data['startDate']),
+        this._endDate = DateTime.parse(data['endDate']),
+        this._comment = data['comment'],
+        this._userData = data['user'] ?? data['userData'];
 
+  int get id => _id;
   String get type => _type;
   DateTime get startDate => _startDate;
   DateTime get endDate => _endDate;

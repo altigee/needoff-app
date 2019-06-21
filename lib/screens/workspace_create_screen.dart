@@ -122,45 +122,8 @@ class _WorkspaceCreateScreenState extends State<WorkspaceCreateScreen>
                       ),
                     ),
                     SizedBox(
-                      height: 40,
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Text(
-                          'Members:',
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Expanded(
-                          child: Form(
-                            key: _memberFormKey,
-                            child: TextFormField(
-                              keyboardType: TextInputType.emailAddress,
-                              controller: _memberInpCtrl,
-                              validator: (value) {
-                                if (!isValidEmail(value)) {
-                                  return 'Enter valid email';
-                                }
-                              },
-                              decoration: InputDecoration(
-                                  hintText: "enter person's email"),
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.add),
-                          onPressed: _handleAddMember,
-                        ),
-                      ],
-                    ),
-                    Container(
-                      height: 280,
-                      padding: EdgeInsets.only(top: 16, bottom: 16),
-                      child: _buildMembersList(),
-                    ),
+                      height: 48,
+                    )
                   ],
                 ),
               ),

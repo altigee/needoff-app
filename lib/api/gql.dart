@@ -38,10 +38,10 @@ rawQuery(String query) async {
   } catch (e) {}
 }
 
-rawMutation(String mutation) async {
+rawMutation(String mutation, { Map<String, dynamic> variables}) async {
   try {
     QueryResult res =
-        await (await getClient()).mutate(MutationOptions(document: mutation));
+        await (await getClient()).mutate(MutationOptions(document: mutation, variables: variables));
     if (res.hasErrors) {
       print('GQL > Mutation res > has errorr');
       _tryParseErrors(res.errors);

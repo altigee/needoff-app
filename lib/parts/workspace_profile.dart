@@ -253,19 +253,20 @@ class _WorkspaceDatesListViewState extends State<WorkspaceDatesListView> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            if (widget.editable) _dateTxt,
-            IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () async {
-                var res = await openConfirmation(context,
-                    title: 'Are you sure?', okLabel: 'remove');
-                if (res != null &&
-                    res['ok'] &&
-                    widget.removeCallback is Function) {
-                  widget.removeCallback(hol.id);
-                }
-              },
-            )
+            _dateTxt,
+            if (widget.editable)
+              IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () async {
+                  var res = await openConfirmation(context,
+                      title: 'Are you sure?', okLabel: 'remove');
+                  if (res != null &&
+                      res['ok'] &&
+                      widget.removeCallback is Function) {
+                    widget.removeCallback(hol.id);
+                  }
+                },
+              )
           ],
         ),
       );

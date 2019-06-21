@@ -18,7 +18,10 @@ mutation CreateLeave {
       userId,
       leaveType
     }
-    ok
+    ok,
+    errors,
+    warnings,
+    notes,
   }
 }
   ''');

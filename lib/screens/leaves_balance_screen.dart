@@ -152,17 +152,19 @@ class _LeavesBalanceScreenState extends State<LeavesBalanceScreen>
               child: CircularProgressIndicator(),
             )
           : Container(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    sick(),
-                    vacation(),
-                    wfh(),
-                  ],
-                ),
-              ),
+              child: _balance != null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          sick(),
+                          vacation(),
+                          wfh(),
+                        ],
+                      ),
+                    )
+                  : Center(child: Text('Data not available.')),
             ),
     );
   }

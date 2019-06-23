@@ -68,9 +68,11 @@ class _WorkspaceCreateScreenState extends State<WorkspaceCreateScreen>
     if (_formKey.currentState.validate()) {
       loading = true;
       try {
-        await appState.addWorkspace(Workspace(_nameInpCtrl.text,
+        var res = await appState.addWorkspace(Workspace(_nameInpCtrl.text,
             description: _descInpCtrl.text, members: members));
-        Navigator.of(context).pop();
+        int id = int.tryParse(res.data['createWorkspace']['ws']['id']);
+        Navigator.of(context)
+            .popAndPushNamed('/workspace-profile', arguments: {'id': id});
       } on AppStateException catch (e) {
         snack(_formKey.currentContext, e.message);
       } catch (e) {

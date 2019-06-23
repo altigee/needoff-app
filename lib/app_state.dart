@@ -188,7 +188,8 @@ class AppState {
       throw AppStateException('Failed to add workspace.');
     }
 
-    return fetchWorkspaces();
+    await fetchWorkspaces();
+    return res;
   }
 
   Future fetchTeamWorkspaceDates() async {

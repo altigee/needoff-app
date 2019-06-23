@@ -272,7 +272,7 @@ rule doctors_note_needed_for_3_sick_leaves:
     when:
         \$payload := DayOffValidationPayload(leave.leave_type == LeaveTypes.SICK_LEAVE)
     then:
-        \$payload.warnings.append("Our policies require a doctors note if for sick leaves longer than 3 days")
+        \$payload.warnings.append("Our policies require a doctor’s note if for sick leaves longer than 3 days")
 
 rule leaves_longer_than_10_business_days:
     when:
@@ -284,11 +284,11 @@ rule leaves_longer_than_10_business_days:
 
 rule day_off_start_date_is_after_start_date_in_ws:
     when:
-        \$payload := DayOffValidationPayload( leave.start_date >= leave.end_date )
+        \$payload := DayOffValidationPayload( leave.start_date > leave.end_date )
     then:
         modify \$payload:
             is_rejected = True
-        \$payload.errors.append("Start date should be before end date")
+        \$payload.errors.append("Start date cannot be after the end date")
 
 rule paid_leaves_precedent_over_unpaid:
     when:

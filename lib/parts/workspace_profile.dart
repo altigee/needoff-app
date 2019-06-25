@@ -4,8 +4,10 @@ import 'package:needoff/models/workspace.dart'
     show
         Workspace,
         WorkspaceInvitation,
+        WorkspaceMember,
         WorkspaceUpdateCallback,
-        WorkspaceInvitationRemoveCallback,
+        WorkspaceRemoveMemberCallback,
+        WorkspaceUpdateMemberCallback,
         WorkspaceDate,
         WorkspaceDateRemoveCallback,
         Policy;
@@ -155,7 +157,10 @@ class _WorkspaceInfoViewState extends State<WorkspaceInfoView> {
             SizedBox(
               height: 32,
             ),
-            InfoRow(title: 'Owner', value: widget.workspace?.owner?.name),
+            InfoRow(
+                title: 'Owner',
+                value:
+                    '${widget.workspace?.owner?.name} (${widget.workspace?.owner?.email})'),
             SizedBox(
               height: 64,
             ),
@@ -179,7 +184,7 @@ class _WorkspaceInfoViewState extends State<WorkspaceInfoView> {
 class WorkspaceInvitationsView extends StatefulWidget {
   final Workspace workspace;
   final bool editable;
-  final WorkspaceInvitationRemoveCallback removeCallback;
+  final WorkspaceRemoveMemberCallback removeCallback;
   WorkspaceInvitationsView(this.workspace,
       {this.removeCallback, this.editable = false});
 
@@ -226,6 +231,89 @@ class _WorkspaceInvitationsViewState extends State<WorkspaceInvitationsView> {
             )
           : ListView(
               children: _buildList(data),
+            ),
+    );
+  }
+}
+
+class WorkspaceMembersView extends StatefulWidget {
+  final Workspace workspace;
+  final bool editable;
+  final WorkspaceRemoveMemberCallback removeCallback;
+  final WorkspaceUpdateMemberCallback updateMemberCallback;
+  WorkspaceMembersView(this.workspace,
+      {this.removeCallback, this.updateMemberCallback, this.editable = false});
+
+  @override
+  _WorkspaceMembersViewState createState() => _WorkspaceMembersViewState();
+}
+
+class _WorkspaceMembersViewState extends State<WorkspaceMembersView> {
+  List<Widget> _buildList(List data) {
+    return data.map((member) {
+      bool canDel =
+          widget.editable && member.userId != widget.workspace?.owner?.id;
+      bool canUpdate = widget.editable;
+      return ListTile(
+          title: Text(
+              '${member?.profile?.firstName} ${member?.profile?.lastName}'),
+          subtitle: Text(
+              '${member?.profile?.email}\nFirst day: ${formatDate(member.startDate)}'),
+          onTap: () {
+            print('tap tap tap');
+          },
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              if (canUpdate)
+                IconButton(
+                    icon: Icon(Icons.today),
+                    onPressed: () async {
+                      var res = await openDatePicker(context,
+                          initialDate: member.startDate);
+                      print(res);
+                      if (res != null &&
+                          widget.updateMemberCallback is Function) {
+                        widget.updateMemberCallback(
+                          workspaceId: widget.workspace.id,
+                          memberId: member.userId,
+                          startDate: res,
+                        );
+                      }
+                    }),
+              if (canDel)
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () async {
+                    var res = await openConfirmation(context,
+                        title: 'Are you sure?', okLabel: 'remove');
+                    if (res != null &&
+                        res['ok'] &&
+                        widget.removeCallback is Function) {
+                      widget.removeCallback(
+                          email: member?.profile?.email,
+                          workspaceId: widget.workspace.id);
+                    }
+                  },
+                )
+            ],
+          ));
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<WorkspaceMember> data = widget.workspace?.members ?? [];
+    return Container(
+      child: data.length == 0
+          ? Center(
+              child: Text('No members found.'),
+            )
+          : ListView(
+              children: ListTile.divideTiles(
+                      context: context, tiles: _buildList(data))
+                  .toList(),
             ),
     );
   }

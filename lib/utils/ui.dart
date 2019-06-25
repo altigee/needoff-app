@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-void snack(source, String text, {Duration duration = const Duration(milliseconds: 1000)}) {
+void snack(source, String text,
+    {Duration duration = const Duration(milliseconds: 1000)}) {
   var scaff;
   if (source is BuildContext) scaff = Scaffold.of(source);
   if (source is ScaffoldState) scaff = source;
@@ -8,7 +9,10 @@ void snack(source, String text, {Duration duration = const Duration(milliseconds
   scaff
     ..hideCurrentSnackBar()
     ..showSnackBar(
-      SnackBar(content: Text(text), duration: duration,),
+      SnackBar(
+        content: Text(text),
+        duration: duration,
+      ),
     );
 }
 
@@ -45,8 +49,8 @@ Future<DateTime> openDatePicker(BuildContext ctx,
     {DateTime firstDate, DateTime lastDate, DateTime initialDate}) {
   return showDatePicker(
       context: ctx,
-      firstDate: firstDate ?? DateTime.now(),
-      lastDate: lastDate ?? DateTime(2020),
+      firstDate: firstDate ?? DateTime(1990),
+      lastDate: lastDate ?? DateTime(2030),
       initialDate: initialDate ?? DateTime.now());
 }
 

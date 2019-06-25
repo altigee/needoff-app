@@ -8,7 +8,6 @@ import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/parts/widget_mixins.dart' show LoadingState;
 import 'package:needoff/utils/ui.dart';
 
-
 class LeavesScreenBase extends StatefulWidget {
   final String leaveType;
   final String screenTitle;
@@ -236,6 +235,10 @@ class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
     });
 
     appState.changes.addListener(_updateListener);
+    loadLeaves();
+  }
+
+  void loadLeaves() {
     loading = true;
     appState.fetchLeaves().then((res) {
       _filterByType();

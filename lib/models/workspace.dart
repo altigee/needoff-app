@@ -7,8 +7,10 @@ typedef WorkspaceUpdateCallback(
     {int id, String name, String description, Policy policy});
 typedef WorkspaceInvitationAddCallback(
     {@required String email, @required int workspaceId});
-typedef WorkspaceInvitationRemoveCallback(
+typedef WorkspaceRemoveMemberCallback(
     {@required String email, @required int workspaceId});
+typedef WorkspaceUpdateMemberCallback(
+    {@required int memberId, @required int workspaceId, @required DateTime startDate});
 typedef WorkspaceDateRemoveCallback(int id);
 
 class Workspace {
@@ -33,10 +35,13 @@ class Workspace {
         this._workspaceDates = workspaceDates,
         this._owner = owner;
   Workspace.fromJson(Map data,
-      {List invitations, List workspaceDates, Map ownerData})
+      {List invitations, List members, List workspaceDates, Map ownerData})
       : this._description = data['description'],
         this._id = int.parse(data['id']),
         this._name = data['name'],
+        this._members = members.map((item) {
+          return WorkspaceMember.fromJson(item);
+        }).toList(),
         this._invitations = invitations.map((item) {
           return WorkspaceInvitation.fromJson(item);
         }).toList(),
@@ -56,6 +61,20 @@ class Workspace {
   List<WorkspaceInvitation> get invitations => _invitations ?? [];
   List<WorkspaceDate> get workspaceDates => _workspaceDates ?? [];
   Profile get owner => _owner;
+}
+
+class WorkspaceMember {
+  int _userId;
+  DateTime _startDate;
+  Profile _profile;
+  WorkspaceMember.fromJson(Map data)
+      : this._userId = int.tryParse(data['userId']),
+        this._startDate = DateTime.tryParse(data['startDate']),
+        this._profile = Profile(data['profile']);
+  
+  int get userId => _userId;
+  DateTime get startDate => _startDate;
+  Profile get profile => _profile;
 }
 
 class WorkspaceInvitation {

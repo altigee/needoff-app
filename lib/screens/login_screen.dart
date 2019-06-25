@@ -96,20 +96,20 @@ class _LoginScreenState extends State<LoginScreen> with LoadingState {
                   Padding(
                     padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        FlatButton(
-                          child: Text(
-                            'Forgot Password?',
-                            style: Theme.of(context)
-                                .textTheme
-                                .overline
-                                .apply(fontFamily: 'Orbitron'),
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pushNamed('/forgot-pwd');
-                          },
-                        ),
+                        // FlatButton(
+                        //   child: Text(
+                        //     'Forgot Password?',
+                        //     style: Theme.of(context)
+                        //         .textTheme
+                        //         .overline
+                        //         .apply(fontFamily: 'Orbitron'),
+                        //   ),
+                        //   onPressed: () {
+                        //     Navigator.of(context).pushNamed('/forgot-pwd');
+                        //   },
+                        // ),
                         FlatButton(
                           child: Text(
                             'Create Account',

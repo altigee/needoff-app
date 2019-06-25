@@ -89,6 +89,15 @@ query LoadWorkspace {
     email,
     status
   }
+  members: workspaceMembers(workspaceId: $id) {
+    userId,
+    startDate,
+    profile {
+      firstName,
+      lastName,
+      email,
+    }
+  }
   dates: workspaceDates(workspaceId: $id) {
     id,
     name,
@@ -129,6 +138,17 @@ mutation AddMember {
   return res;
 }
 
+Future<QueryResult> updateMember(int memberId, int workspaceId, DateTime startDate) async {
+  QueryResult res = await gql.rawMutation('''
+mutation updateMember {
+  updateWorkspaceMember(userId: $memberId, wsId: $workspaceId, startDate: "${formatForGQL(startDate)}"){
+    ok
+  }
+}
+  ''');
+
+  return res;
+}
 Future<QueryResult> removeMember(String email, int workspaceId) async {
   QueryResult res = await gql.rawMutation('''
 mutation RemoveMember {

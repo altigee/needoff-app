@@ -14,6 +14,11 @@ class _StartScreenState extends State<StartScreen> with LoadingState {
     storage.getWorkspace().then((wsId) {
       _wsId = wsId;
     });
+    storage.getToken().then((token){
+      if (token == null) {
+        Navigator.of(context).popUntil(ModalRoute.withName('/'));
+      }
+    });
   }
 
   @override

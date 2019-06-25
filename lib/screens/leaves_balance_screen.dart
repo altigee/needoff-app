@@ -13,11 +13,18 @@ class LeavesBalanceScreen extends StatefulWidget {
 
 class _LeavesBalanceScreenState extends State<LeavesBalanceScreen>
     with LoadingState, ScaffoldKey {
-  int _wsId;
   Map _balance;
+  
+  @override
   void initState() {
     super.initState();
     setStateFn = setState;
+  }
+
+  @override
+  didChangeDependencies() {
+    super.didChangeDependencies();
+    print('load balances !!!');
     loadBalance();
   }
 

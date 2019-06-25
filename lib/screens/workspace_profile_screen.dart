@@ -23,7 +23,7 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
   void initState() {
     super.initState();
     setStateFn = setState;
-    _tabCtrl = TabController(vsync: this, length: 3, initialIndex: 0);
+    _tabCtrl = TabController(vsync: this, length: 4, initialIndex: 0);
     _tabCtrl.addListener(() {
       if (!_tabCtrl.indexIsChanging) setState(() {});
     });
@@ -52,6 +52,7 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
         Map wsData = res.data;
         _workspace = Workspace.fromJson(wsData['info'],
             invitations: wsData['invitations'],
+            members: wsData['members'],
             workspaceDates: wsData['dates'],
             ownerData: wsData['owner']);
         _isOwner = _workspace.owner?.id == appState.profile.id;
@@ -92,7 +93,22 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
     }
   }
 
-  removeInvitation({String email, int workspaceId}) async {
+  updateMember({int workspaceId, int memberId, DateTime startDate}) async {
+    try {
+      loading = true;
+      var res = await workspaceServ.updateMember(memberId, workspaceId, startDate);
+      if(res.hasErrors) {
+        snack(_scaffKey.currentState, 'Failed to update member');
+      }
+      await loadWorkspace();
+    } catch (e) {
+      snack(_scaffKey.currentState, 'Something went wrong :(');
+    } finally {
+      loading = false;
+    }
+  }
+
+  removeFromWorkspace({String email, int workspaceId}) async {
     try {
       var res = await workspaceServ.removeMember(email, workspaceId);
       if (res.hasErrors) {
@@ -131,7 +147,7 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
           );
         }
         break;
-      case 2:
+      case 3:
         if (_isOwner) {
           fab = FloatingActionButton(
             backgroundColor: Theme.of(context).accentColor,
@@ -187,6 +203,9 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
         icon: Icon(Icons.info),
       ),
       Tab(
+        icon: Icon(Icons.people_outline),
+      ),
+      Tab(
         icon: Icon(Icons.people),
       ),
       Tab(
@@ -212,7 +231,11 @@ class _WorkspaceProfileScreenState extends State<WorkspaceProfileScreen>
                   loading: loading,
                 ),
                 WorkspaceInvitationsView(_workspace,
-                    removeCallback: _isOwner ? removeInvitation : null,
+                    removeCallback: _isOwner ? removeFromWorkspace : null,
+                    editable: _isOwner),
+                WorkspaceMembersView(_workspace,
+                    removeCallback: _isOwner ? removeFromWorkspace : null,
+                    updateMemberCallback: _isOwner ? updateMember : null,
                     editable: _isOwner),
                 WorkspaceDatesListView(_workspace,
                     removeCallback: _isOwner ? removeWorkspaceDate : null,

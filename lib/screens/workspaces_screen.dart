@@ -60,13 +60,24 @@ class _WorkspacesScreenState extends State<WorkspacesScreen> with LoadingState {
         contentPadding: EdgeInsets.fromLTRB(16, 4, 16, 4),
         title: Text(item.name),
         subtitle: Text(item.description ?? ''),
-        trailing: IconButton(
-          onPressed: () {
-            _setCurrentWorkspace(item);
-          },
-          icon: Icon(current
-              ? Icons.radio_button_checked
-              : Icons.radio_button_unchecked),
+        trailing: Container(
+          padding: EdgeInsets.only(left: 8),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: Colors.grey[200],
+                width: 1,
+              ),
+            ),
+          ),
+          child: IconButton(
+            onPressed: () {
+              _setCurrentWorkspace(item);
+            },
+            icon: Icon(current
+                ? Icons.radio_button_checked
+                : Icons.radio_button_unchecked),
+          ),
         ),
       );
     }).toList();

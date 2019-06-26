@@ -45,6 +45,7 @@ class AppState {
   Profile _profile;
   List<Workspace> _workspaces = [];
   List<Leave> _leaves = [];
+  List<Leave> _leavesForApproval = [];
 
   AppState() {
     invalidTokenNotifier.addListener(() {
@@ -56,6 +57,7 @@ class AppState {
   Profile get profile => _profile;
   List<Workspace> get workspaces => _workspaces ?? [];
   List<Leave> get leaves => _leaves ?? [];
+  List<Leave> get leavesForApproval => _leavesForApproval ?? [];
 
   set profile(Profile profile) {
     _profile = profile;
@@ -64,6 +66,11 @@ class AppState {
 
   set workspaces(List<Workspace> workspaces) {
     _workspaces = workspaces;
+    _changes.notify();
+  }
+
+  set leavesForApproval(List<Leave> leaves) {
+    _leavesForApproval = leaves;
     _changes.notify();
   }
 
@@ -104,6 +111,7 @@ class AppState {
     storage.removeWorkspace();
     profile = null;
     leaves = null;
+    leavesForApproval = null;
     workspaces = null;
     _changes.removeAllListeners();
   }
@@ -129,6 +137,43 @@ class AppState {
         }
         leaves = tmpLeaves;
         return leaves;
+      }
+    } else {
+      leaves = [];
+      throw AppStateException('Failed to load leaves.');
+    }
+  }
+
+  Future<bool> _isOwner() async {
+    int workspaceId = await storage.getWorkspace();
+    if (workspaceId == null) return false;
+    var ownerRes = await workspaceServ.fetchOwner(workspaceId);
+    int ownerId;
+    if (ownerRes.hasErrors ||
+        ownerRes.data == null ||
+        ownerRes.data['owner'] == null ||
+        (ownerId = int.tryParse(ownerRes.data['owner']['userId'])) == null)
+      return false;
+
+    return ownerId == appState.profile.id;
+  }
+
+  Future fetchLeavesForApproval() async {
+    if (await _isOwner() == false) {
+      leavesForApproval = [];
+      return leavesForApproval;
+    }
+    int workspaceId = await storage.getWorkspace();
+    QueryResult res = await leavesServ.fetchLeavesForApproval(workspaceId);
+    if (!res.hasErrors && res.data != null) {
+      if (res.data['leaves'] != null) {
+        List<Leave> tmpLeaves = [];
+        for (var item in res.data['leaves']) {
+          tmpLeaves.add(Leave.fromJson(item));
+        }
+        leavesForApproval = tmpLeaves;
+        print(res.data['leaves']);
+        return leavesForApproval;
       }
     } else {
       leaves = [];

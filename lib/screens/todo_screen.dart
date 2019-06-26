@@ -19,39 +19,10 @@ class _TodoScreenState extends State<TodoScreen>
   int _wsId;
   List<Leave> _leaves;
   List<Leave> get leaves => _leaves ?? [];
-  Future<bool> _isOwner() async {
-    var ownerRes = await workspaceServ.fetchOwner(_wsId);
-    int ownerId;
-    if (ownerRes.hasErrors ||
-        ownerRes.data == null ||
-        ownerRes.data['owner'] == null ||
-        (ownerId = int.tryParse(ownerRes.data['owner']['userId'])) == null)
-      return false;
 
-    return ownerId == appState.profile.id;
-  }
-
-  void loadLeavesForApproval() async {
-    _wsId = await storage.getWorkspace();
-    if (_wsId == null) return;
-    try {
-      if (await _isOwner()) {
-        loading = true;
-        var res = await leavesServ.fetchLeavesForApproval(_wsId);
-        if (res.hasErrors || res.data == null) {
-          snack(scaffKey, 'Failed to load leaves for approval');
-        } else {
-          _leaves = List.castFrom<dynamic, Leave>(res.data['dayOffsForApproval']
-              .map((item) => Leave.fromJson(item))
-              .toList());
-          print(leaves);
-        }
-      }
-    } catch (e) {
-      snack(scaffKey, 'Something went wrong :(');
-    } finally {
-      loading = false;
-    }
+  void _handleStateChange() async {
+    _leaves = appState.leavesForApproval;
+    setState(() {});
   }
 
   _buildLeavesList() {
@@ -124,7 +95,7 @@ class _TodoScreenState extends State<TodoScreen>
         snack(scaffKey, 'Failed to approve leave request.');
       } else {
         snack(scaffKey, 'Approved.');
-        loadLeavesForApproval();
+        appState.fetchLeavesForApproval();
       }
     } catch (e) {
       snack(scaffKey, 'Something went wrong.');
@@ -135,7 +106,19 @@ class _TodoScreenState extends State<TodoScreen>
   void initState() {
     super.initState();
     setStateFn = setState;
-    loadLeavesForApproval();
+    loading = true;
+    appState.fetchLeavesForApproval()
+      .whenComplete((){
+        loading = false;
+      });
+    appState.changes.addListener(_handleStateChange);
+  }
+
+  @override
+  void dispose() {
+    appState.changes.removeListener(_handleStateChange);
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override

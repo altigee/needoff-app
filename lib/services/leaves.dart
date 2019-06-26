@@ -85,7 +85,7 @@ query TeamCalendar {
 Future<QueryResult> fetchLeavesForApproval(int workspaceId) async {
   QueryResult res = await gql.rawQuery('''
 query LeavesForApproval {
-  dayOffsForApproval(workspaceId: $workspaceId) {
+  leaves:dayOffsForApproval(workspaceId: $workspaceId) {
     id,
     leaveType,
     startDate,

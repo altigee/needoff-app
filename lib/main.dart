@@ -18,8 +18,8 @@ import 'package:needoff/parts/leaves_screen_base.dart';
 
 import 'package:needoff/models/leave.dart' show LeaveTypes;
 
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 void main() => runApp(MyApp());
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
         accentColor: Color(0xffff0033),
         textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Montserrat'),
       ),
+      navigatorObservers: [routeObserver],
       routes: {
         '/': (BuildContext context) => Root(),
         '/profile': (BuildContext context) => ProfileScreen(),

@@ -15,8 +15,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> with LoadingState {
   final _formKey = GlobalKey<FormState>();
 
-  TextEditingController _emailCtrl = TextEditingController(text: '@alt.com');
-  TextEditingController _pwdCtrl = TextEditingController(text: 'ssssss');
+  TextEditingController _emailCtrl = TextEditingController();//text: '@alt.com');
+  TextEditingController _pwdCtrl = TextEditingController();//text: 'ssssss');
 
   Future _handleLogin() async {
     if (_formKey.currentState.validate()) {

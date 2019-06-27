@@ -187,7 +187,8 @@ class AppState {
     if (res.hasErrors) {
       throw AppStateException('Failed to add new leave.');
     }
-    return fetchLeaves();
+    await fetchLeaves();
+    return res;
   }
 
   Future fetchTeamLeaves() async {

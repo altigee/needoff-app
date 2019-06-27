@@ -37,6 +37,10 @@ query FetchLeaves {
     startDate,
     endDate,
     comment,
+    approvedBy {
+      firstName,
+      lastName
+    }
   }
 }
   ''');

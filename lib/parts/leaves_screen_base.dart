@@ -45,6 +45,13 @@ class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
       if (diff.inDays != 0) {
         dates += ' - ${formatDate(item.endDate)}';
       }
+      String approvalStr;
+      if (item.approverData != null) {
+        approvalStr =
+            'Approved by ${item.approverData['firstName']}  ${item.approverData['lastName']}';
+      } else {
+        approvalStr = 'Pending approval';
+      }
       return ListTile(
         onTap: () {},
         contentPadding: EdgeInsets.fromLTRB(16, 4, 16, 4),
@@ -54,10 +61,23 @@ class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
             Text(dates),
             Text(days,
                 style: TextStyle(
-                    inherit: true, color: LeaveTypeColors[widget.leaveType])),
+                    inherit: true,
+                    color: item.approverData != null
+                        ? LeaveTypeColors[widget.leaveType]
+                        : Colors.grey)),
           ],
         ),
-        subtitle: Text(item.comment ?? ''),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(item.comment ?? ''),
+            Text(approvalStr,
+                style: TextStyle(
+                  inherit: true,
+                  fontSize: 10,
+                )),
+          ],
+        ),
       );
     }).toList();
   }
@@ -185,14 +205,129 @@ class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
         initialDate: DateTime.now());
   }
 
+  _showValidationResults(errors, warnings, notes) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  ...errors
+                      .map((txt) => Padding(
+                          padding: EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              SizedBox(
+                                width: 24,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Icon(
+                                    Icons.error,
+                                    color: Colors.red,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                  child: Text(
+                                txt,
+                                softWrap: true,
+                              )),
+                            ],
+                          )))
+                      .toList(),
+                  ...warnings
+                      .map((txt) => Padding(
+                          padding: EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              SizedBox(
+                                width: 24,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Icon(
+                                    Icons.warning,
+                                    color: Colors.orange,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                  child: Text(
+                                txt,
+                                softWrap: true,
+                              )),
+                            ],
+                          )))
+                      .toList(),
+                  ...notes
+                      .map((txt) => Padding(
+                          padding: EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              SizedBox(
+                                width: 24,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Icon(
+                                    Icons.info,
+                                    color: Colors.blueGrey,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                  child: Text(
+                                txt,
+                                softWrap: true,
+                              )),
+                            ],
+                          )))
+                      .toList(),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
+
   _handleAddLeave(context) async {
     if (_addLeaveDialogOpened == true) {
       return null;
     }
     Leave newLeave = await _showAddLeaveDialog(context);
     if (newLeave != null) {
+      loading = true;
       try {
-        await appState.addLeave(newLeave);
+        var res = await appState.addLeave(newLeave);
+        var data = res.data['createDayOff'];
+        if (data != null) {
+          var errors = data['errors'];
+          var warnings = data['warnings'];
+          var notes = data['notes'];
+          if (errors != null || warnings != null || notes != null) {
+            await _showValidationResults(errors ?? [], warnings ?? [], notes ?? []);
+            if (data['dayOff'] != null) {
+              snack(_scaffoldKey, 'Request submitted for approval.');
+            } else {
+              snack(_scaffoldKey, 'Failed to add day off.');
+            }
+          }
+        } else {
+          snack(_scaffoldKey, 'Something went wrong :(');
+        }
       } on AppStateException catch (e) {
         WidgetsBinding.instance.addPostFrameCallback((timestamp) {
           snack(_scaffoldKey.currentState, e.message);
@@ -202,6 +337,7 @@ class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
           snack(_scaffoldKey.currentState, 'Something went wrong :(');
         });
       }
+      loading = false;
     }
   }
 
@@ -221,6 +357,7 @@ class _LeavesScreenBaseState extends State<LeavesScreenBase> with LoadingState {
   @override
   void initState() {
     super.initState();
+    setStateFn = setState;
     WidgetsBinding.instance.addPostFrameCallback((timestamp) {
       Map args = ModalRoute.of(context).settings.arguments;
       var ctx = context;

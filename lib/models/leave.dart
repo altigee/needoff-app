@@ -7,6 +7,7 @@ class Leave {
   DateTime _endDate;
   String _comment;
   Map _userData;
+  Map _approverData;
 
   Leave(this._type, this._startDate, this._endDate, this._comment,
       {int id, Map userData})
@@ -19,7 +20,8 @@ class Leave {
         this._startDate = DateTime.parse(data['startDate']),
         this._endDate = DateTime.parse(data['endDate']),
         this._comment = data['comment'],
-        this._userData = data['user'] ?? data['userData'];
+        this._userData = data['user'] ?? data['userData'],
+        this._approverData = data['approvedBy'];
 
   int get id => _id;
   String get type => _type;
@@ -27,6 +29,7 @@ class Leave {
   DateTime get endDate => _endDate;
   String get comment => _comment;
   Map get userData => _userData;
+  Map get approverData => _approverData;
 }
 
 class LeaveTypes {

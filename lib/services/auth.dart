@@ -28,3 +28,25 @@ mutation Login {
   ''');
   return res;
 }
+Future<QueryResult> registerDeviceToken(String token) async {
+  QueryResult res = await gql.rawMutation('''
+mutation RegisterDeviceToken {
+  saveUserDevice(token: "$token") {
+    userId,
+    token
+  }
+}
+  ''');
+  return res;
+}
+Future<QueryResult> removeDeviceToken(String token) async {
+  QueryResult res = await gql.rawMutation('''
+mutation RemoveDeviceToken {
+  removeUserDevice(token: "$token") {
+    userId,
+    token
+  }
+}
+  ''');
+  return res;
+}

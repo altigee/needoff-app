@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -42,12 +44,15 @@ class AppStateNotifier extends ChangeNotifier {
 
 class AppState {
   AppStateNotifier _changes = AppStateNotifier();
+  AppStateNotifier _notificationStream = AppStateNotifier();
   AppStateNotifier get changes => _changes;
+  AppStateNotifier get notificationStream => _notificationStream;
 
   Profile _profile;
   List<Workspace> _workspaces = [];
   List<Leave> _leaves = [];
   List<Leave> _leavesForApproval = [];
+  List<Map<String, dynamic>> _notifications = [];
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
@@ -57,19 +62,25 @@ class AppState {
       logout();
     });
     _firebaseMessaging.configure(
-      onMessage: (data) {
+      onMessage: (Map<String, dynamic> data) {
         print('[PUSH NOTFIF]: ON MESSAGE CB:');
         print(data);
+        print(data['type']);
+        print(data['data']);
         _handlePushNotification(data);
       },
       onResume: (data) {
         print('[PUSH NOTFIF]: ON RESUME CB:');
         print(data);
+        print(data['type']);
+        print(data['data']);
         _handlePushNotification(data);
       },
       onLaunch: (data) {
         print('[PUSH NOTFIF]: ON LAUNCH CB:');
         print(data);
+        print(data['type']);
+        print(data['data']);
         _handlePushNotification(data);
       },
     );
@@ -88,6 +99,7 @@ class AppState {
   List<Workspace> get workspaces => _workspaces ?? [];
   List<Leave> get leaves => _leaves ?? [];
   List<Leave> get leavesForApproval => _leavesForApproval ?? [];
+  List<Map<String, dynamic>> get notifications => _notifications ?? [];
 
   set profile(Profile profile) {
     _profile = profile;
@@ -125,9 +137,27 @@ class AppState {
     }
   }
 
+  _appendNotification(Map<String, dynamic> notification) {
+    _notifications.add(notification);
+    _notificationStream.notify();
+  }
+
   _handlePushNotification(data) {
-    if (data != null && data['data'] != null) {
-      switch (data['data']['type']) {
+    if (data != null) {
+      String type;
+      String title;
+      String body;
+      if (Platform.isIOS) {
+        type = data['type'];
+        title = data['aps']['alert']['title'];
+        body = data['aps']['alert']['body'];
+      } else if (Platform.isAndroid && data['data'] != null) {
+        type = data['data']['type'];
+        title = data['notification']['title'];
+        body = data['notification']['body'];
+      }
+      _appendNotification({'type': type, 'title': title, 'body': body});
+      switch (type) {
         case 'request_approved':
           fetchLeaves();
           break;

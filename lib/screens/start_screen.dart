@@ -43,6 +43,62 @@ class _StartScreenState extends State<StartScreen>
     });
     storage.changes.addListener(_onStorageUpdate);
     appState.changes.addListener(_checkTodo);
+    appState.notificationStream.addListener(_handleNotification);
+  }
+
+  _handleNotification() {
+    if (!mounted) return;
+    var lastNotif = appState.notifications.last;
+    if (lastNotif != null) {
+      showModalBottomSheet(
+          context: context,
+          builder: (ctx) {
+            return GestureDetector(
+              onTap: () {
+                switch (lastNotif['type']) {
+                  case 'request_approved':
+                    Navigator.popAndPushNamed(context, '/leaves');
+                    break;
+                  case 'new_leave_requested':
+                    Navigator.popAndPushNamed(context, '/todo');
+                    break;
+                  default:
+                    return;
+                }
+              },
+              child: Container(
+                padding: EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Icon(
+                      Icons.notification_important,
+                      color: Theme.of(context).accentColor,
+                      size: 24,
+                    ),
+                    SizedBox(
+                      width: 16,
+                    ),
+                    Flexible(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            lastNotif['title'],
+                            style: TextStyle(
+                                inherit: true, fontWeight: FontWeight.bold),
+                          ),
+                          Text(lastNotif['body']),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          });
+    }
   }
 
   _checkTodo() async {
@@ -61,6 +117,7 @@ class _StartScreenState extends State<StartScreen>
   void dispose() {
     storage.changes.removeListener(_onStorageUpdate);
     appState.changes.removeListener(_checkTodo);
+    appState.notificationStream.removeListener(_handleNotification);
     routeObserver.unsubscribe(this);
     super.dispose();
   }

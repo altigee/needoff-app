@@ -5,6 +5,7 @@ import 'package:needoff/models/credentials.dart';
 import 'package:needoff/parts/app_scaffold.dart';
 import 'package:needoff/parts/widget_mixins.dart';
 import 'package:needoff/utils/ui.dart';
+import 'package:needoff/utils/validation.dart' show isValidEmail;
 
 class RegistrationScreen extends StatefulWidget {
   @override
@@ -74,8 +75,8 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                               decoration: InputDecoration(labelText: 'Email'),
                               controller: _emailCtrl,
                               validator: (value) {
-                                if (value.isEmpty) {
-                                  return "Please enter your email.";
+                                if (value.isEmpty || !isValidEmail(value)) {
+                                  return "Please enter valid email.";
                                 }
                               },
                             ),

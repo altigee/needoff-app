@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:needoff/api/gql.dart';
 import 'package:needoff/models/credentials.dart';
 
@@ -40,17 +44,54 @@ class AppStateNotifier extends ChangeNotifier {
 
 class AppState {
   AppStateNotifier _changes = AppStateNotifier();
+  AppStateNotifier _notificationStream = AppStateNotifier();
   AppStateNotifier get changes => _changes;
+  AppStateNotifier get notificationStream => _notificationStream;
 
   Profile _profile;
   List<Workspace> _workspaces = [];
   List<Leave> _leaves = [];
   List<Leave> _leavesForApproval = [];
+  List<Map<String, dynamic>> _notifications = [];
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   AppState() {
     invalidTokenNotifier.addListener(() {
       print('GQL ERROR : Invalid token : logout');
       logout();
+    });
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> data) {
+        print('[PUSH NOTFIF]: ON MESSAGE CB:');
+        print(data);
+        print(data['type']);
+        print(data['data']);
+        _handlePushNotification(data);
+      },
+      onResume: (data) {
+        print('[PUSH NOTFIF]: ON RESUME CB:');
+        print(data);
+        print(data['type']);
+        print(data['data']);
+        _handlePushNotification(data);
+      },
+      onLaunch: (data) {
+        print('[PUSH NOTFIF]: ON LAUNCH CB:');
+        print(data);
+        print(data['type']);
+        print(data['data']);
+        _handlePushNotification(data);
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+    _firebaseMessaging.getToken().then((String token) {
+      print('FCM Token: $token');
     });
   }
 
@@ -58,6 +99,7 @@ class AppState {
   List<Workspace> get workspaces => _workspaces ?? [];
   List<Leave> get leaves => _leaves ?? [];
   List<Leave> get leavesForApproval => _leavesForApproval ?? [];
+  List<Map<String, dynamic>> get notifications => _notifications ?? [];
 
   set profile(Profile profile) {
     _profile = profile;
@@ -79,12 +121,62 @@ class AppState {
     _changes.notify();
   }
 
+  _saveDeviceToken() async {
+    try {
+      await authServ.registerDeviceToken(await _firebaseMessaging.getToken());
+    } catch (e) {
+      print('[ERROR] Failed to register device token');
+    }
+  }
+
+  _removeDeviceToken() async {
+    try {
+      await authServ.removeDeviceToken(await _firebaseMessaging.getToken());
+    } catch (e) {
+      print('[ERROR] Failed to remove device token');
+    }
+  }
+
+  _appendNotification(Map<String, dynamic> notification) {
+    _notifications.add(notification);
+    _notificationStream.notify();
+  }
+
+  _handlePushNotification(data) {
+    if (data != null) {
+      String type;
+      String title;
+      String body;
+      if (Platform.isIOS) {
+        type = data['type'];
+        title = data['aps']['alert']['title'];
+        body = data['aps']['alert']['body'];
+      } else if (Platform.isAndroid && data['data'] != null) {
+        type = data['data']['type'];
+        title = data['notification']['title'];
+        body = data['notification']['body'];
+      }
+      _appendNotification({'type': type, 'title': title, 'body': body});
+      switch (type) {
+        case 'request_approved':
+          fetchLeaves();
+          break;
+        case 'new_leave_requested':
+          fetchLeavesForApproval();
+          break;
+        default:
+          return;
+      }
+    }
+  }
+
   Future signin(Credentials creds) async {
     QueryResult res = await authServ.signIn(creds);
     if (!res.hasErrors &&
         res.data != null &&
         res.data['login']['accessToken'] != null) {
       storage.setToken(res.data['login']['accessToken']);
+      await _saveDeviceToken();
     } else {
       await storage.removeToken();
       throw AppStateException('Failed to login.');
@@ -99,6 +191,7 @@ class AppState {
         res.data != null &&
         res.data['register']['accessToken'] != null) {
       storage.setToken(res.data['register']['accessToken']);
+      await _saveDeviceToken();
     } else {
       throw AppStateException('Failed to create account.');
     }
@@ -107,6 +200,7 @@ class AppState {
   }
 
   Future logout() async {
+    if (await storage.getToken() != null) await _removeDeviceToken();
     storage.removeToken();
     storage.removeWorkspace();
     profile = null;

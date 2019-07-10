@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:needoff/app_state.dart' show appState;
+import 'package:needoff/app_state.dart';
 import 'package:needoff/screens/leaves_balance_screen.dart';
 import 'package:needoff/screens/person_leaves_screen.dart';
 import 'package:needoff/screens/team_calendar_screen.dart';
@@ -20,6 +20,7 @@ import 'package:needoff/models/leave.dart' show LeaveTypes;
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 void main() => runApp(MyApp());
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,8 @@ class MyApp extends StatelessWidget {
         '/forgot-pwd': (BuildContext context) => ForgotPasswordScreen(),
         '/workspaces': (BuildContext context) => WorkspacesScreen(),
         '/workspace-edit': (BuildContext context) => WorkspaceCreateScreen(),
-        '/workspace-profile': (BuildContext context) => WorkspaceProfileScreen(),
+        '/workspace-profile': (BuildContext context) =>
+            WorkspaceProfileScreen(),
         '/team-calendar': (BuildContext context) => TeamCalendar(),
         '/person-leaves': (BuildContext context) => PersonLeaves(),
         '/todo': (BuildContext context) => TodoScreen(),

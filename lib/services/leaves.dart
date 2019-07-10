@@ -109,7 +109,7 @@ query LeavesForApproval {
 
 Future<QueryResult> approve(int leaveId) async {
   QueryResult res = await gql.rawMutation('''
-mutation CreateLeave {
+mutation ApproveLeave {
   approveDayOff(dayOffId: $leaveId) {
     ok
   }
